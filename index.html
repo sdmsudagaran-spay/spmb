@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart PMB Sudagaran</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            navy: '#0F2747',
+                            gold: '#D9A441',
+                            goldlight: '#F8E9C9',
+                            bg: '#F4F7FB',
+                            text: '#1E293B',
+                            muted: '#64748B'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'app': '20px',
+                        'app-lg': '24px',
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 25px -5px rgba(15, 39, 71, 0.08), 0 8px 10px -6px rgba(15, 39, 71, 0.04)',
+                        'gold-glow': '0 4px 20px -2px rgba(217, 164, 65, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #e2e8f0; /* Latar belakang desktop */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Container simulasi layar HP */
+        #app-container {
+            width: 100%;
+            max-width: 414px; /* Lebar iPhone Max */
+            height: 100vh;
+            background-color: #F4F7FB;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Tampilan membulat hanya di desktop */
+        @media (min-width: 480px) {
+            #app-container {
+                height: 896px;
+                max-height: 95vh;
+                border-radius: 40px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                border: 8px solid #111;
+            }
+        }
+
+        /* Sembunyikan scrollbar tapi tetap bisa scroll */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Animasi Transisi */
+        .fade-enter { opacity: 0; transform: translateY(10px); }
+        .fade-enter-active { opacity: 1; transform: translateY(0); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-exit { opacity: 1; transform: translateY(0); }
+        .fade-exit-active { opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; }
+
+        .slide-up { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .slide-up.active { transform: translateY(0); }
+
+        /* Micro interactions */
+        .btn-press { transition: all 0.2s ease; }
+        .btn-press:active { transform: scale(0.96); }
+        
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(15, 39, 71, 0.12); }
+
+        /* Bento Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .bento-item { background: white; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .bento-2x2 { grid-column: span 2; grid-row: span 2; align-items: flex-start; text-align: left; justify-content: space-between; }
+        .bento-2x1 { grid-column: span 2; flex-direction: row; justify-content: flex-start; gap: 12px; text-align: left; }
+
+        /* Progress Bar Anim */
+        @keyframes fillProgress {
+            from { width: 0; }
+            to { width: var(--target-width); }
+        }
+        .progress-animate {
+            animation: fillProgress 1s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+
+    <div id="view-login" class="absolute inset-0 bg-brand-navy flex flex-col items-center justify-center p-6 z-50 transition-opacity duration-500">
+        <!-- Hiasan Background Islamic Geometric (SVG Sederhana) -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0,0 L100,100 M100,0 L0,100" stroke="#D9A441" stroke-width="0.5" fill="none"/>
+                <circle cx="50" cy="50" r="30" stroke="#D9A441" stroke-width="0.5" fill="none"/>
+                <rect x="20" y="20" width="60" height="60" stroke="#D9A441" stroke-width="0.5" fill="none" transform="rotate(45 50 50)"/>
+            </svg>
+        </div>
+
+        <div class="w-full max-w-sm bg-white rounded-app-lg p-8 shadow-2xl relative z-10 fade-enter-active">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-brand-bg rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-brand-gold">
+                    <i class="ph ph-mosque text-4xl text-brand-navy"></i>
+                </div>
+                <h1 class="font-heading font-bold text-2xl text-brand-navy">Smart PMB</h1>
+                <p class="text-sm text-brand-muted mt-1">SD Muhammadiyah Sudagaran</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-brand-navy mb-1">Username</label>
+                    <div class="relative">
+                        <i class="ph ph-user absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted"></i>
+                        <input type="text" id="login-username" class="w-full bg-brand-bg border border-gray-200 rounded-app py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors" placeholder="Masukkan username">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-brand-navy mb-1">Password</label>
+                    <div class="relative">
+                        <i class="ph ph-lock absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted"></i>
+                        <input type="password" id="login-password" class="w-full bg-brand-bg border border-gray-200 rounded-app py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors" placeholder="Masukkan password">
+                    </div>
+                </div>
+                <div id="login-error" class="hidden bg-red-50 text-red-500 text-xs p-3 rounded-xl border border-red-100 text-center">
+                    Username atau password salah.
+                </div>
+                <button onclick="handleLogin()" class="btn-press w-full bg-brand-navy text-white font-medium rounded-app py-3.5 shadow-premium hover:bg-opacity-90 flex justify-center items-center gap-2 mt-2">
+                    Masuk Aplikasi
+                    <i class="ph ph-arrow-right font-bold"></i>
+                </button>
+            </div>
+            
+            <p class="text-center text-xs text-brand-muted mt-6">
+                Butuh bantuan? <a href="#" class="text-brand-gold font-medium">Hubungi Panitia</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="view-dashboard" class="hidden flex-col h-full w-full bg-brand-bg">
+        
+        <!-- Header & Hero Section (Navy Background) -->
+        <div class="bg-brand-navy rounded-b-[32px] pt-12 pb-24 px-6 relative shadow-premium z-10">
+            <!-- Header Top -->
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 border-2 border-brand-gold shadow-gold-glow">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmad" alt="Profile" class="w-full h-full rounded-full">
+                    </div>
+                    <div>
+                        <p class="text-xs text-brand-goldlight opacity-90 font-medium">Assalamu'alaikum,</p>
+                        <h2 id="user-name-display" class="font-heading font-semibold text-white text-lg leading-tight">Ahmad Fathan</h2>
+                    </div>
+                </div>
+                <button class="relative btn-press w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                    <i class="ph ph-bell text-white text-xl"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                </button>
+            </div>
+
+            <!-- Identitas Pendaftaran -->
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <p class="text-[10px] text-brand-goldlight uppercase tracking-wider font-semibold">Nomor Pendaftaran</p>
+                    <p id="user-nopend-display" class="text-white font-mono text-sm">SPMB-2027-001</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/30">
+                    <p id="user-wave-display" class="text-xs text-white font-medium">Gelombang 1</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Area Konten yang bisa di-scroll -->
+        <div class="flex-1 overflow-y-auto no-scrollbar -mt-16 px-5 pb-24 relative z-20">
+            
+            <div class="bg-white rounded-[24px] p-5 shadow-premium mb-6 border border-gray-100 card-hover">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-heading font-semibold text-brand-navy text-sm">Progress SPMB</h3>
+                    <span class="text-brand-gold font-bold text-xl font-heading">82%</span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full h-3 bg-brand-bg rounded-full overflow-hidden mb-4">
+                    <div class="h-full bg-gradient-to-r from-brand-navy to-brand-gold rounded-full progress-animate" style="--target-width: 82%;"></div>
+                </div>
+
+                <div class="bg-brand-bg rounded-xl p-3 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-brand-gold shadow-sm shrink-0">
+                        <i class="ph-fill ph-hourglass-high text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-brand-muted">Status Saat Ini:</p>
+                        <p class="text-sm font-semibold text-brand-navy leading-tight">Menunggu Verifikasi Berkas</p>
+                    </div>
+                </div>
+
+                <hr class="my-4 border-gray-100">
+
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] text-brand-muted uppercase">Tahap Berikutnya</p>
+                        <p class="text-sm font-medium text-brand-navy">Tes Kesiapan Belajar</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-brand-muted uppercase">Tanggal</p>
+                        <p class="text-sm font-medium text-brand-navy">25 Jan 2027</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-3 mb-6">
+                <button onclick="openModal('modal-dokumen')" class="btn-press flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-[16px] bg-white shadow-sm flex items-center justify-center text-brand-navy border border-gray-50">
+                        <i class="ph ph-upload-simple text-2xl"></i>
+                    </div>
+                    <span class="text-[10px] font-medium text-brand-navy text-center leading-tight">Upload<br>Dokumen</span>
+                </button>
+                <button onclick="openModal('modal-pembayaran')" class="btn-press flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-[16px] bg-white shadow-sm flex items-center justify-center text-brand-gold border border-gray-50">
+                        <i class="ph ph-wallet text-2xl"></i>
+                    </div>
+                    <span class="text-[10px] font-medium text-brand-navy text-center leading-tight">Bayar<br>Tagihan</span>
+                </button>
+                <button onclick="openModal('modal-hasil')" class="btn-press flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-[16px] bg-white shadow-sm flex items-center justify-center text-green-600 border border-gray-50">
+                        <i class="ph ph-chart-polar text-2xl"></i>
+                    </div>
+                    <span class="text-[10px] font-medium text-brand-navy text-center leading-tight">Hasil<br>Seleksi</span>
+                <div id="login-error" class="hidden bg-red-50 text-red-500 text-xs p-3 rounded-xl border border-red-100 text-center">
+                    Username atau password salah.
+                </div>
+                <button id="login-btn" onclick="handleLogin()" class="btn-press w-full bg-brand-navy text-white font-medium rounded-app py-3.5 shadow-premium hover:bg-opacity-90 flex justify-center items-center gap-2 mt-2">
+                    Masuk Aplikasi
+                    <i class="ph ph-arrow-right font-bold"></i>
+                </button>
+            </div>
+
+            <div class="flex justify-between items-center mb-3 px-1">
+                <h3 class="font-heading font-semibold text-brand-navy text-sm">Layanan PMB</h3>
+                <i class="ph ph-dots-three text-brand-muted text-xl"></i>
+            </div>
+            
+            <div class="bento-grid mb-8" id="dynamic-menu-container">
+                <!-- Menu items akan di-render via JS -->
+            </div>
+
+            <div class="mb-6">
+                <h3 class="font-heading font-semibold text-brand-navy text-sm mb-3 px-1">Jadwal Terdekat</h3>
+                <div class="bg-gradient-to-r from-brand-navy to-[#1a3a6c] rounded-[20px] p-4 text-white shadow-premium relative overflow-hidden card-hover">
+                    <!-- Ornamen -->
+                    <i class="ph-fill ph-calendar-check absolute -right-4 -bottom-4 text-7xl text-white opacity-10"></i>
+                    
+                    <div class="flex items-center gap-3 mb-2 relative z-10">
+                        <div class="bg-brand-gold rounded-lg px-2 py-1 text-center min-w-[45px]">
+                            <p class="text-[10px] uppercase font-bold leading-none">Jan</p>
+                            <p class="text-lg font-heading font-bold leading-none mt-1">25</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-sm">Tes Kesiapan Belajar</p>
+                            <div class="flex items-center gap-2 mt-1 text-xs text-brand-goldlight">
+                                <i class="ph ph-clock"></i> 08.00 WIB
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs mt-3 pt-3 border-t border-white/20 relative z-10">
+                        <i class="ph ph-map-pin"></i> Ruang I An Nahl (Gedung Utama)
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-3 px-1">
+                    <h3 class="font-heading font-semibold text-brand-navy text-sm">Pengumuman Terbaru</h3>
+                    <a href="#" class="text-xs text-brand-gold font-medium">Lihat Semua</a>
+                </div>
+                <div class="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar -mx-5 px-5">
+                    
+                    <!-- Card Pengumuman 1 -->
+                    <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md">INFO</span>
+                            <span class="text-[10px] text-brand-muted">2 Jam yang lalu</span>
+                        </div>
+                        <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">Verifikasi Berkas Gelombang 1 Sedang Diproses</h4>
+                        <p class="text-xs text-brand-muted line-clamp-2">Mohon menunggu maksimal 2x24 jam hari kerja untuk hasil verifikasi.</p>
+                    </div>
+
+                    <!-- Card Pengumuman 2 -->
+                    <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded-md">PENTING</span>
+                            <span class="text-[10px] text-brand-muted">Kemarin</span>
+                        </div>
+                        <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">Persiapan Tes Kesiapan Belajar</h4>
+                        <p class="text-xs text-brand-muted line-clamp-2">Peserta diwajibkan membawa alat tulis lengkap dan id card sementara.</p>
+                    </div>
+
+                </div>
+            </div>
+            
+            <!-- Spacer for bottom nav -->
+            <div class="h-10"></div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 rounded-b-[40px] px-6 py-3 flex justify-between items-center z-30 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
+            <button class="flex flex-col items-center gap-1 text-brand-gold btn-press">
+                <i class="ph-fill ph-house text-2xl"></i>
+                <span class="text-[10px] font-medium">Beranda</span>
+            </button>
+            <button onclick="openModal('modal-timeline')" class="flex flex-col items-center gap-1 text-brand-muted hover:text-brand-navy btn-press">
+                <i class="ph ph-git-commit text-2xl"></i>
+                <span class="text-[10px] font-medium">Timeline</span>
+            </button>
+            
+            <!-- Center FAB Menu (Optional styling) -->
+            <div class="relative -top-5">
+                <button class="w-14 h-14 bg-brand-navy rounded-full flex items-center justify-center text-white shadow-premium btn-press border-4 border-brand-bg">
+                    <i class="ph ph-scan text-2xl"></i>
+                </button>
+            </div>
+
+            <button onclick="openModal('modal-pembayaran')" class="flex flex-col items-center gap-1 text-brand-muted hover:text-brand-navy btn-press">
+                <i class="ph ph-wallet text-2xl"></i>
+                <span class="text-[10px] font-medium">Bayar</span>
+            </button>
+            <button class="flex flex-col items-center gap-1 text-brand-muted hover:text-brand-navy btn-press">
+                <i class="ph ph-user text-2xl"></i>
+                <span class="text-[10px] font-medium">Profil</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ========================================== -->
+    <div id="modal-container" class="absolute inset-0 z-50 pointer-events-none">
+        
+        <!-- Background Overlay -->
+        <div id="modal-overlay" class="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-300 pointer-events-none" onclick="closeAllModals()"></div>
+
+        <!-- MODAL: TIMELINE -->
+        <div id="modal-timeline" class="modal-content absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] h-[85%] slide-up flex flex-col pointer-events-auto">
+            <div class="p-4 flex justify-center shrink-0">
+                <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+            </div>
+            <div class="px-6 pb-4 flex justify-between items-center border-b border-gray-100 shrink-0">
+                <h2 class="font-heading font-bold text-lg text-brand-navy">Timeline SPMB</h2>
+                <button onclick="closeAllModals()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 btn-press">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="relative border-l-2 border-gray-100 ml-4 space-y-8 pb-8">
+                    
+                    <!-- Item Selesai -->
+                    <div class="relative pl-6">
+                        <div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
+                            <i class="ph-bold ph-check text-white text-[10px]"></i>
+                        </div>
+                        <h4 class="font-semibold text-brand-navy text-sm">Pendaftaran Online</h4>
+                        <p class="text-xs text-brand-muted mt-1">10 Jan 2027 • Berhasil disimpan</p>
+                    </div>
+
+                    <!-- Item Selesai -->
+                    <div class="relative pl-6">
+                        <div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
+                            <i class="ph-bold ph-check text-white text-[10px]"></i>
+                        </div>
+                        <h4 class="font-semibold text-brand-navy text-sm">Melengkapi Dokumen</h4>
+                        <p class="text-xs text-brand-muted mt-1">12 Jan 2027 • 5/5 Dokumen diunggah</p>
+                    </div>
+
+                    <!-- Item Berjalan (Active) -->
+                    <div class="relative pl-6">
+                        <div class="absolute -left-[13px] top-0 w-6 h-6 bg-brand-gold rounded-full border-4 border-white shadow-sm flex items-center justify-center animate-pulse">
+                            <div class="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                        <h4 class="font-semibold text-brand-navy text-sm">Verifikasi Berkas</h4>
+                        <p class="text-xs text-brand-muted mt-1">Sedang diproses oleh panitia.</p>
+                        <div class="mt-2 bg-yellow-50 border border-yellow-100 rounded-lg p-2 text-[10px] text-yellow-700">
+                            Mohon pastikan nomor telepon aktif untuk konfirmasi jika diperlukan.
+                        </div>
+                    </div>
+
+                    <!-- Item Belum -->
+                    <div class="relative pl-6 opacity-50">
+                        <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>
+                        <h4 class="font-semibold text-brand-navy text-sm">Tes Kesiapan Belajar</h4>
+                        <p class="text-xs text-brand-muted mt-1">Jadwal: 25 Jan 2027</p>
+                    </div>
+
+                    <div class="relative pl-6 opacity-50">
+                        <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>
+                        <h4 class="font-semibold text-brand-navy text-sm">Pengumuman Hasil</h4>
+                        <p class="text-xs text-brand-muted mt-1">Jadwal: 30 Jan 2027</p>
+                    </div>
+
+                    <div class="relative pl-6 opacity-50">
+                        <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>
+                        <h4 class="font-semibold text-brand-navy text-sm">Daftar Ulang</h4>
+                        <p class="text-xs text-brand-muted mt-1">Belum dimulai</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: PEMBAYARAN -->
+        <div id="modal-pembayaran" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[90%] slide-up flex flex-col pointer-events-auto">
+             <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
+                <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+            </div>
+            <div class="px-6 pb-4 bg-white flex justify-between items-center shrink-0">
+                <h2 class="font-heading font-bold text-lg text-brand-navy">Keuangan</h2>
+                <button onclick="closeAllModals()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 btn-press">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto no-scrollbar">
+                <!-- Saldo/Tagihan Card -->
+                <div class="bg-brand-navy text-white p-6 m-4 rounded-[24px] shadow-premium relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-xl"></div>
+                    <p class="text-xs text-brand-goldlight mb-1">Total Tagihan Aktif</p>
+                    
+                    <div class="flex items-center gap-3 mb-4">
+                        <h3 class="font-heading font-bold text-3xl">Rp 2.500.000</h3>
+                        <button onclick="copyText('2500000', 'Nominal tagihan berhasil disalin!')" class="btn-press w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-sm transition-colors" title="Salin Nominal">
+                            <i class="ph ph-copy text-white"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-sm border-t border-white/10 pt-3">
+                        <span class="text-white/70">Status Pembayaran</span>
+                        <span class="bg-red-500/20 text-red-300 text-[10px] px-2 py-1 rounded-md border border-red-500/30">Belum Lunas</span>
+                    </div>
+                </div>
+
+                <div class="px-4 pb-8 space-y-4">
+                    <!-- Rincian Tagihan Card -->
+                    <h3 class="font-heading font-semibold text-brand-navy text-sm px-2">Rincian Tagihan</h3>
+                    
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                        <!-- Komponen Biaya -->
+                        <div class="space-y-3 mb-4">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-brand-muted">Pendaftaran</span>
+                                <span class="font-medium text-brand-navy">Rp 200.000</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-brand-muted">Daftar Ulang</span>
+                                <span class="font-medium text-brand-navy">Rp 1.000.000</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-brand-muted">Biaya Operasional (BOPD)</span>
+                                <span class="font-medium text-brand-navy">Rp 1.500.000</span>
+                            </div>
+                        </div>
+
+                        <hr class="border-dashed border-gray-200 mb-4">
+
+                        <!-- Komponen Potongan -->
+                        <div class="space-y-3 mb-4">
+                            <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-2">Potongan Biaya</p>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-brand-muted flex items-center gap-1"><i class="ph-fill ph-tag text-green-500"></i> Early Bird</span>
+                                <span class="font-medium text-green-600">- Rp 100.000</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-brand-muted flex items-center gap-1"><i class="ph-fill ph-tag text-green-500"></i> Kader Aum</span>
+                                <span class="font-medium text-green-600">- Rp 50.000</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-brand-muted flex items-center gap-1"><i class="ph-fill ph-tag text-green-500"></i> Khusus</span>
+                                <span class="font-medium text-green-600">- Rp 50.000</span>
+                            </div>
+                        </div>
+
+                        <!-- Total Keseluruhan -->
+                        <div class="bg-brand-bg rounded-xl p-3 flex justify-between items-center border border-gray-100">
+                            <span class="font-semibold text-brand-navy text-sm">Total Dibayar</span>
+                            <span class="font-bold font-heading text-brand-navy">Rp 2.500.000</span>
+                        </div>
+                    </div>
+
+                    <!-- Instruksi Transfer -->
+                    <h3 class="font-heading font-semibold text-brand-navy text-sm px-2 mt-6 mb-3">Instruksi Pembayaran</h3>
+                    <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+                        <!-- Ornamen -->
+                        <i class="ph-fill ph-bank absolute -right-4 -bottom-4 text-7xl text-blue-500 opacity-5"></i>
+                        
+                        <p class="text-xs text-brand-navy mb-4 font-medium leading-relaxed relative z-10">
+                            Silakan lakukan transfer tepat sesuai <strong class="text-blue-700">Total Dibayar</strong> ke rekening resmi PMB di bawah ini:
+                        </p>
+                        
+                        <div class="bg-white rounded-xl p-4 border border-blue-100 mb-4 relative z-10 shadow-sm">
+                            <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-xs tracking-wider">
+                                    BRI
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-sm text-brand-navy block">Bank Rakyat Indonesia</span>
+                                    <span class="text-[10px] text-brand-muted">Cabang Wonosobo</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <p class="text-[10px] text-brand-muted uppercase tracking-wider font-semibold">Nomor Rekening</p>
+                                    <p class="font-mono font-bold text-brand-navy text-lg tracking-widest mt-0.5">699901021110530</p>
+                                </div>
+                                <button onclick="copyText('699901021110530', 'Nomor Rekening BRI berhasil disalin!')" class="btn-press bg-blue-50 text-blue-600 p-2.5 rounded-xl hover:bg-blue-100 transition-colors shadow-sm" title="Salin Rekening">
+                                    <i class="ph ph-copy text-xl"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-2.5 border border-gray-100">
+                                <p class="text-[10px] text-brand-muted uppercase tracking-wider font-semibold">Atas Nama</p>
+                                <p class="font-medium text-xs text-brand-navy mt-0.5">PMB SD Muhammadiyah Sudagaran Wonosobo</p>
+                            </div>
+                        </div>
+
+                        <button onclick="alertCustom('Silakan pilih file bukti transfer Anda.')" class="relative z-10 btn-press w-full bg-blue-600 text-white font-medium rounded-xl py-3.5 shadow-[0_4px_12px_rgba(37,99,235,0.2)] hover:bg-blue-700 flex justify-center items-center gap-2 text-sm transition-colors">
+                            <i class="ph ph-upload-simple font-bold text-lg"></i>
+                            Upload Bukti Transfer
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: DOKUMEN -->
+        <div id="modal-dokumen" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[90%] slide-up flex flex-col pointer-events-auto">
+             <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
+                <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+            </div>
+            <div class="px-6 pb-4 bg-white flex justify-between items-center shrink-0 border-b border-gray-100">
+                <h2 class="font-heading font-bold text-lg text-brand-navy">Dokumen Siswa</h2>
+                <button onclick="closeAllModals()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 btn-press">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3">
+                
+                <!-- Dokumen Item (Terverifikasi) -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-500">
+                            <i class="ph-fill ph-file-pdf text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-brand-navy text-sm">Kartu Keluarga (KK)</p>
+                            <p class="text-[10px] text-green-600 font-medium flex items-center gap-1 mt-0.5">
+                                <i class="ph-fill ph-check-circle"></i> Terverifikasi
+                            </p>
+                        </div>
+                    </div>
+                    <button class="text-brand-gold p-2 btn-press"><i class="ph ph-eye"></i></button>
+                </div>
+
+                <!-- Dokumen Item (Menunggu) -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center text-yellow-500">
+                            <i class="ph-fill ph-file-image text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-brand-navy text-sm">Akta Kelahiran</p>
+                            <p class="text-[10px] text-yellow-600 font-medium flex items-center gap-1 mt-0.5">
+                                <i class="ph-fill ph-clock"></i> Menunggu Verifikasi
+                            </p>
+                        </div>
+                    </div>
+                    <button class="text-brand-gold p-2 btn-press"><i class="ph ph-eye"></i></button>
+                </div>
+
+                <!-- Dokumen Item (Revisi) -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-red-200 bg-red-50/30 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-500">
+                            <i class="ph-fill ph-camera text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-brand-navy text-sm">Pas Foto Siswa</p>
+                            <p class="text-[10px] text-red-600 font-medium flex items-center gap-1 mt-0.5">
+                                <i class="ph-fill ph-warning-circle"></i> Perlu Direvisi
+                            </p>
+                        </div>
+                    </div>
+                    <button class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium btn-press">Upload Ulang</button>
+                </div>
+
+                <!-- Dokumen Item (Belum) -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-dashed border-gray-300 flex items-center justify-between opacity-70">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+                            <i class="ph ph-file-plus text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-brand-navy text-sm">Sertifikat Prestasi (Opsional)</p>
+                            <p class="text-[10px] text-brand-muted mt-0.5">Belum diunggah</p>
+                        </div>
+                    </div>
+                    <button class="bg-brand-navy text-white text-xs px-3 py-1.5 rounded-lg font-medium btn-press">Upload</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- MODAL: HASIL SELEKSI (Chart.js) -->
+        <div id="modal-hasil" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[95%] slide-up flex flex-col pointer-events-auto">
+             <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
+                <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+            </div>
+            <div class="px-6 pb-4 bg-white flex justify-between items-center shrink-0">
+                <h2 class="font-heading font-bold text-lg text-brand-navy">Hasil Analisis Siswa</h2>
+                <button onclick="closeAllModals()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 btn-press">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto no-scrollbar p-5">
+                
+                <div class="bg-green-500 text-white p-4 rounded-[20px] mb-5 shadow-sm text-center">
+                    <i class="ph-fill ph-check-circle text-4xl mb-2"></i>
+                    <h3 class="font-heading font-bold text-lg">Alhamdulillah, Diterima!</h3>
+                    <p class="text-xs mt-1 opacity-90">Ananda disarankan masuk ke kelas unggulan berdasarkan hasil tes kesiapan belajar.</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-[20px] shadow-sm mb-5 border border-gray-100">
+                    <h3 class="font-heading font-semibold text-brand-navy text-sm mb-4 text-center">Profil Kesiapan Belajar</h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-[20px] shadow-sm mb-8 border border-gray-100">
+                    <h3 class="font-heading font-semibold text-brand-navy text-sm mb-4">Rincian Nilai</h3>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-brand-navy">Mengenal Huruf</span>
+                                <span class="text-brand-gold font-bold">85</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-brand-navy h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-brand-navy">Mengenal Bilangan</span>
+                                <span class="text-brand-gold font-bold">90</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-brand-gold h-2 rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-brand-navy">Menggunting & Menempel</span>
+                                <span class="text-brand-gold font-bold">80</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-brand-navy h-2 rounded-full" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-brand-navy">Doa Harian</span>
+                                <span class="text-brand-gold font-bold">95</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-brand-gold h-2 rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-brand-navy">Surat Pendek</span>
+                                <span class="text-brand-gold font-bold">88</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-brand-navy h-2 rounded-full" style="width: 88%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-medium text-brand-navy">Interview</span>
+                                <span class="text-brand-gold font-bold">92</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-brand-gold h-2 rounded-full" style="width: 92%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- Data & State ---
+    // Di aplikasi nyata, menu ini bisa dikontrol dari Admin Panel (Database)
+    const dynamicMenus = [
+        { id: 'timeline', title: 'Timeline', icon: 'ph-git-commit', color: 'text-brand-navy', bg: 'bg-blue-50', style: 'bento-2x2', action: "openModal('modal-timeline')" },
+        { id: 'payment', title: 'Pembayaran', icon: 'ph-wallet', color: 'text-brand-gold', bg: 'bg-orange-50', style: 'bento-2x1', action: "openModal('modal-pembayaran')" },
+        { id: 'docs', title: 'Dokumen', icon: 'ph-folder', color: 'text-green-600', bg: 'bg-green-50', style: 'bento-1x1', action: "openModal('modal-dokumen')" },
+        { id: 'profile', title: 'Profil Siswa', icon: 'ph-user-circle', color: 'text-purple-600', bg: 'bg-purple-50', style: 'bento-1x1', action: "alertCustom('Buka Profil')" }
+    ];
+
+    let chartInstance = null;
+
+    // --- DOM Elements ---
+    const viewLogin = document.getElementById('view-login');
+    const viewDashboard = document.getElementById('view-dashboard');
+    const loginError = document.getElementById('login-error');
+    const modalContainer = document.getElementById('modal-container');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modals = document.querySelectorAll('.modal-content');
+
+    window.pmbDatabase = [];
+    
+    async function loadCloudDatabase() {
+        const btn = document.getElementById('login-btn');
+        if(!btn) return;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Menghubungkan Data...';
+        btn.disabled = true;
+        btn.classList.add('opacity-80', 'cursor-not-allowed');
+
+        try {
+            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOnNbIG7xdGiUxsozYsJTeIZyS_0-u20nXZxW5Roruppg0c1wNRzON4E7rR1aK6ESmr9LO0j-ULAga/pub?gid=2007081756&single=true&output=csv';
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network error');
+            const csvText = await response.text();
+            
+            window.pmbDatabase = parseCSV(csvText);
+            console.log("✅ Data dari Spreadsheet berhasil diload:", window.pmbDatabase.length, "baris");
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.remove('opacity-80', 'cursor-not-allowed');
+        } catch (e) {
+            console.error("Gagal mengambil data Spreadsheet:", e);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.remove('opacity-80', 'cursor-not-allowed');
+        }
+    }
+
+    function parseCSV(str) {
+        const arr = [];
+        let quote = false;
+        let row = 0, col = 0, c = 0;
+        for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+            let cc = str[c], nc = str[c+1];
+            arr[row] = arr[row] || [];
+            arr[row][col] = arr[row][col] || '';
+            if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+            if (cc == '"') { quote = !quote; continue; }
+            if (cc == ',' && !quote) { ++col; continue; }
+            if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+            if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+            if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+            arr[row][col] += cc;
+        }
+        const headers = arr[0].map(h => h.trim());
+        const data = [];
+        for (let i = 1; i < arr.length; i++) {
+            if(arr[i].length <= 1 && !arr[i][0]) continue;
+            let obj = {};
+            for (let j = 0; j < headers.length; j++) {
+                obj[headers[j]] = arr[i][j] ? arr[i][j].trim() : '';
+            }
+            data.push(obj);
+        }
+        return data;
+    }
+
+    window.addEventListener('DOMContentLoaded', loadCloudDatabase);
+
+    // --- Authentication ---
+    function handleLogin() {
+        const user = document.getElementById('login-username').value;
+        const pass = document.getElementById('login-password').value;
+
+        // Validasi menggunakan Data Spreadsheet CSV jika ada
+        let loggedInUser = null;
+        if (window.pmbDatabase && window.pmbDatabase.length > 0) {
+            loggedInUser = window.pmbDatabase.find(row => {
+                const keys = Object.keys(row);
+                const userKey = keys.find(k => k.toLowerCase().includes('username') || k.toLowerCase().includes('nisn'));
+                const passKey = keys.find(k => k.toLowerCase().includes('password') || k.toLowerCase().includes('pass'));
+                
+                if (userKey && passKey) {
+                    return (row[userKey] === user) && (row[passKey] === pass);
+                } else {
+                    const vals = Object.values(row);
+                    return vals.includes(user) && vals.includes(pass);
+                }
+            });
+        }
+
+        if (loggedInUser || (user === 'murid' && pass === 'berkah')) {
+            loginError.classList.add('hidden');
+            
+            if (loggedInUser) updateDashboardUI(loggedInUser);
+            
+            // Animasi transisi ke dashboard
+            viewLogin.classList.remove('fade-enter-active');
+            viewLogin.classList.add('fade-exit-active');
+            
+            setTimeout(() => {
+                viewLogin.classList.add('hidden');
+                viewDashboard.classList.remove('hidden');
+                viewDashboard.classList.add('flex', 'fade-enter-active');
+                
+                // Render Menu setelah login berhasil
+                renderDynamicMenu();
+                
+                // Trigger animasi progress bar ulang agar terlihat
+                const pb = document.querySelector('.progress-animate');
+                pb.style.animation = 'none';
+                pb.offsetHeight; // trigger reflow
+                pb.style.animation = null;
+            }, 300);
+
+        } else {
+            loginError.classList.remove('hidden');
+            // Efek shake pada container login
+            const loginBox = viewLogin.querySelector('.bg-white');
+            loginBox.style.transform = 'translateX(-10px)';
+            setTimeout(() => loginBox.style.transform = 'translateX(10px)', 100);
+            setTimeout(() => loginBox.style.transform = 'translateX(-10px)', 200);
+            setTimeout(() => loginBox.style.transform = 'translateX(0)', 300);
+        }
+    }
+
+    function updateDashboardUI(userData) {
+        const keys = Object.keys(userData);
+        const nameKey = keys.find(k => k.toLowerCase().includes('nama'));
+        const nopendKey = keys.find(k => k.toLowerCase().includes('nomor') || k.toLowerCase().includes('pendaftaran'));
+        const waveKey = keys.find(k => k.toLowerCase().includes('gelombang'));
+        
+        if (nameKey && userData[nameKey]) document.getElementById('user-name-display').innerText = userData[nameKey];
+        if (nopendKey && userData[nopendKey]) document.getElementById('user-nopend-display').innerText = userData[nopendKey];
+        if (waveKey && userData[waveKey]) document.getElementById('user-wave-display').innerText = userData[waveKey];
+    }
+
+    // --- Rendering ---
+    function renderDynamicMenu() {
+        const container = document.getElementById('dynamic-menu-container');
+        container.innerHTML = ''; // Clear
+
+        dynamicMenus.forEach(menu => {
+            const el = document.createElement('div');
+            el.className = `bento-item ${menu.style} border border-gray-100 shadow-sm card-hover cursor-pointer btn-press`;
+            el.setAttribute('onclick', menu.action);
+
+            if (menu.style === 'bento-2x2') {
+                // Style khusus untuk kotak besar
+                el.innerHTML = `
+                    <div class="w-12 h-12 rounded-full ${menu.bg} flex items-center justify-center ${menu.color} mb-2">
+                        <i class="ph-fill ${menu.icon} text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-heading font-semibold text-brand-navy text-sm">${menu.title}</h4>
+                        <p class="text-[10px] text-brand-muted mt-1">Pantau proses dari awal hingga akhir</p>
+                    </div>
+                    <div class="w-full flex justify-end mt-2 text-gray-300"><i class="ph-bold ph-arrow-up-right"></i></div>
+                `;
+            } else if (menu.style === 'bento-2x1') {
+                 el.innerHTML = `
+                    <div class="w-10 h-10 rounded-full ${menu.bg} flex items-center justify-center ${menu.color} shrink-0">
+                        <i class="ph-fill ${menu.icon} text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-heading font-semibold text-brand-navy text-sm">${menu.title}</h4>
+                        <p class="text-[10px] text-brand-muted">Cek tagihan aktif</p>
+                    </div>
+                `;
+            } else {
+                // 1x1 default
+                el.innerHTML = `
+                    <div class="w-10 h-10 rounded-full ${menu.bg} flex items-center justify-center ${menu.color} mb-2">
+                        <i class="ph-fill ${menu.icon} text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-brand-navy text-[11px] leading-tight text-center">${menu.title}</h4>
+                `;
+            }
+            container.appendChild(el);
+        });
+    }
+
+    // --- Modal Logic ---
+    function openModal(id) {
+        modalContainer.classList.remove('pointer-events-none');
+        modalOverlay.classList.remove('opacity-0');
+        modalOverlay.classList.add('opacity-100', 'pointer-events-auto');
+        
+        const modal = document.getElementById(id);
+        if(modal) {
+            modal.classList.add('active');
+            
+            // Inisialisasi Chart jika modal hasil dibuka
+            if(id === 'modal-hasil' && !chartInstance) {
+                setTimeout(initChart, 300); // Tunggu animasi slide selesai
+            }
+        }
+    }
+
+    function closeAllModals() {
+        modalOverlay.classList.remove('opacity-100', 'pointer-events-auto');
+        modalOverlay.classList.add('opacity-0');
+        
+        modals.forEach(m => m.classList.remove('active'));
+        
+        setTimeout(() => {
+            modalContainer.classList.add('pointer-events-none');
+        }, 400); // Tunggu durasi CSS transition
+    }
+
+    // --- Chart.js Initialization ---
+    function initChart() {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        
+        chartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Mengenal Huruf', 'Mengenal Bilangan', 'Menggunting & Menempel', 'Doa Harian', 'Surat Pendek', 'Interview'],
+                datasets: [{
+                    label: 'Skor Siswa',
+                    data: [85, 90, 80, 95, 88, 92],
+                    backgroundColor: 'rgba(217, 164, 65, 0.2)', // Gold with opacity
+                    borderColor: '#D9A441', // Brand Gold
+                    pointBackgroundColor: '#0F2747', // Brand Navy
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#0F2747',
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(0, 0, 0, 0.05)' },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        pointLabels: {
+                            font: { family: 'Inter', size: 10, weight: '600' },
+                            color: '#0F2747'
+                        },
+                        ticks: { display: false, min: 0, max: 100 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    // --- Custom Alert Pengganti native alert() ---
+    function alertCustom(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-brand-navy text-white px-4 py-2 rounded-full text-xs shadow-lg z-[100] fade-enter-active whitespace-nowrap';
+        toast.innerHTML = `<i class="ph ph-info mr-1"></i> ${msg}`;
+        document.getElementById('app-container').appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translate(-50%, -10px)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    }
+
+    // --- Fitur Copy Universal ---
+    function copyText(text, successMessage) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        
+        // Hindari scroll ke bawah saat text area ditambahkan
+        textArea.style.position = "fixed";
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.opacity = "0";
+        
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            alertCustom(successMessage || 'Berhasil disalin!');
+        } catch (err) {
+            alertCustom('Gagal menyalin text');
+        }
+        
+        document.body.removeChild(textArea);
+    }
+
+    function copyRekening(text) {
+        copyText(text, 'Nomor Rekening berhasil disalin!');
+    }
+
+    // Tambahkan listener enter di password field
+    document.getElementById('login-password').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') handleLogin();
+    });
+
+</script>
+</body>
+</html>
