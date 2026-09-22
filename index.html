@@ -149,20 +149,23 @@
                     <label class="block text-sm font-medium text-brand-navy mb-1">Username</label>
                     <div class="relative">
                         <i class="ph ph-user absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted"></i>
-                        <input type="text" id="login-username" class="w-full bg-brand-bg border border-gray-200 rounded-app py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors" placeholder="Masukkan username">
+                        <input type="text" id="login-username" class="w-full bg-brand-bg border border-gray-200 rounded-app py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors" placeholder="Masukkan nama depan siswa">
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-brand-navy mb-1">Password</label>
                     <div class="relative">
                         <i class="ph ph-lock absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted"></i>
-                        <input type="password" id="login-password" class="w-full bg-brand-bg border border-gray-200 rounded-app py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors" placeholder="Masukkan password">
+                        <input type="password" id="login-password" class="w-full bg-brand-bg border border-gray-200 rounded-app py-3 pl-10 pr-12 text-sm focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors" placeholder="Masukkan nomor registrasi">
+                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-navy focus:outline-none transition-colors">
+                            <i id="toggle-icon" class="ph ph-eye text-lg"></i>
+                        </button>
                     </div>
                 </div>
                 <div id="login-error" class="hidden bg-red-50 text-red-500 text-xs p-3 rounded-xl border border-red-100 text-center">
                     Username atau password salah.
                 </div>
-                <button onclick="handleLogin()" class="btn-press w-full bg-brand-navy text-white font-medium rounded-app py-3.5 shadow-premium hover:bg-opacity-90 flex justify-center items-center gap-2 mt-2">
+                <button id="login-btn" onclick="handleLogin()" class="btn-press w-full bg-brand-navy text-white font-medium rounded-app py-3.5 shadow-premium hover:bg-opacity-90 flex justify-center items-center gap-2 mt-2">
                     Masuk Aplikasi
                     <i class="ph ph-arrow-right font-bold"></i>
                 </button>
@@ -263,12 +266,12 @@
                         <i class="ph ph-chart-polar text-2xl"></i>
                     </div>
                     <span class="text-[10px] font-medium text-brand-navy text-center leading-tight">Hasil<br>Seleksi</span>
-                <div id="login-error" class="hidden bg-red-50 text-red-500 text-xs p-3 rounded-xl border border-red-100 text-center">
-                    Username atau password salah.
-                </div>
-                <button id="login-btn" onclick="handleLogin()" class="btn-press w-full bg-brand-navy text-white font-medium rounded-app py-3.5 shadow-premium hover:bg-opacity-90 flex justify-center items-center gap-2 mt-2">
-                    Masuk Aplikasi
-                    <i class="ph ph-arrow-right font-bold"></i>
+                </button>
+                <button onclick="alertCustom('Sedang menghubungi admin...')" class="btn-press flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-[16px] bg-white shadow-sm flex items-center justify-center text-blue-500 border border-gray-50">
+                        <i class="ph ph-headset text-2xl"></i>
+                    </div>
+                    <span class="text-[10px] font-medium text-brand-navy text-center leading-tight">Hubungi<br>Admin</span>
                 </button>
             </div>
 
@@ -360,7 +363,7 @@
                 <i class="ph ph-wallet text-2xl"></i>
                 <span class="text-[10px] font-medium">Bayar</span>
             </button>
-            <button class="flex flex-col items-center gap-1 text-brand-muted hover:text-brand-navy btn-press">
+            <button onclick="openModal('modal-profil')" class="flex flex-col items-center gap-1 text-brand-muted hover:text-brand-navy btn-press">
                 <i class="ph ph-user text-2xl"></i>
                 <span class="text-[10px] font-medium">Profil</span>
             </button>
@@ -735,22 +738,136 @@
             </div>
         </div>
 
+        <!-- MODAL: PROFIL SISWA -->
+        <div id="modal-profil" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[95%] slide-up flex flex-col pointer-events-auto">
+            <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
+                <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+            </div>
+            <div class="px-6 pb-4 bg-white flex justify-between items-center shrink-0 border-b border-gray-100">
+                <h2 class="font-heading font-bold text-lg text-brand-navy">Profil Siswa</h2>
+                <button onclick="closeAllModals()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 btn-press">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto no-scrollbar pb-10">
+                <!-- Header Profil -->
+                <div class="bg-white p-6 mb-4 flex flex-col items-center text-center shadow-sm">
+                    <div class="w-24 h-24 bg-brand-bg rounded-full p-1 border-4 border-brand-gold shadow-gold-glow mb-4 relative">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmad" alt="Profile" class="w-full h-full rounded-full">
+                        <div class="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center text-white">
+                            <i class="ph-bold ph-check text-[10px]"></i>
+                        </div>
+                    </div>
+                    <h3 id="prof-nama_murid" class="font-heading font-bold text-xl text-brand-navy leading-tight">-</h3>
+                    <p id="prof-no_ppdb" class="text-xs text-brand-muted mt-1 font-mono">-</p>
+                </div>
+
+                <div class="px-5 space-y-4">
+                    <!-- Kartu Info Pribadi -->
+                    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-50">
+                            <i class="ph-fill ph-identification-card text-brand-gold text-xl"></i>
+                            <h4 class="font-heading font-semibold text-brand-navy text-sm">Data Pribadi</h4>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Jenis Kelamin</p>
+                                <p id="prof-jk" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Tempat, Tanggal Lahir</p>
+                                <p id="prof-ttl" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Alamat Lengkap</p>
+                                <p id="prof-alamat" class="text-sm font-medium text-brand-navy mt-0.5 leading-relaxed">-</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Asal TK / PAUD</p>
+                                <p id="prof-tk" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kartu Info Ayah -->
+                    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-50">
+                            <i class="ph-fill ph-user text-blue-500 text-xl"></i>
+                            <h4 class="font-heading font-semibold text-brand-navy text-sm">Data Ayah</h4>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Nama Lengkap</p>
+                                <p id="prof-ayah" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p class="text-[10px] text-brand-muted uppercase font-semibold">Agama</p>
+                                    <p id="prof-agama_ayah" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-brand-muted uppercase font-semibold">Pendidikan</p>
+                                    <p id="prof-pend_ayah" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Pekerjaan</p>
+                                <p id="prof-pekrj_ayah" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kartu Info Ibu -->
+                    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-50">
+                            <i class="ph-fill ph-user text-pink-500 text-xl"></i>
+                            <h4 class="font-heading font-semibold text-brand-navy text-sm">Data Ibu</h4>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Nama Lengkap</p>
+                                <p id="prof-ibu" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p class="text-[10px] text-brand-muted uppercase font-semibold">Agama</p>
+                                    <p id="prof-agama_ibu" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-brand-muted uppercase font-semibold">Pendidikan</p>
+                                    <p id="prof-pend_ibu" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Pekerjaan</p>
+                                <p id="prof-pekrj_ibu" class="text-sm font-medium text-brand-navy mt-0.5">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script>
-    // --- Data & State ---
-    // Di aplikasi nyata, menu ini bisa dikontrol dari Admin Panel (Database)
+    //    // --- Data & State ---
+    const SUPABASE_URL = 'https://ckbarwrfpktcdoydbjzy.supabase.co/rest/v1/';
+    const SUPABASE_KEY = 'sb_publishable_jBXJV3WzlzbTlRkpEqGebA_BOlcBWoO';
+
     const dynamicMenus = [
         { id: 'timeline', title: 'Timeline', icon: 'ph-git-commit', color: 'text-brand-navy', bg: 'bg-blue-50', style: 'bento-2x2', action: "openModal('modal-timeline')" },
         { id: 'payment', title: 'Pembayaran', icon: 'ph-wallet', color: 'text-brand-gold', bg: 'bg-orange-50', style: 'bento-2x1', action: "openModal('modal-pembayaran')" },
         { id: 'docs', title: 'Dokumen', icon: 'ph-folder', color: 'text-green-600', bg: 'bg-green-50', style: 'bento-1x1', action: "openModal('modal-dokumen')" },
-        { id: 'profile', title: 'Profil Siswa', icon: 'ph-user-circle', color: 'text-purple-600', bg: 'bg-purple-50', style: 'bento-1x1', action: "alertCustom('Buka Profil')" }
+        { id: 'profile', title: 'Profil Siswa', icon: 'ph-user-circle', color: 'text-purple-600', bg: 'bg-purple-50', style: 'bento-1x1', action: "openModal('modal-profil')" }
     ];
 
     let chartInstance = null;
+    let currentUser = null; // Menyimpan data aktif dari Supabase
 
-    // --- DOM Elements ---
+    //    // --- DOM Elements ---
     const viewLogin = document.getElementById('view-login');
     const viewDashboard = document.getElementById('view-dashboard');
     const loginError = document.getElementById('login-error');
@@ -758,95 +875,114 @@
     const modalOverlay = document.getElementById('modal-overlay');
     const modals = document.querySelectorAll('.modal-content');
 
-    window.pmbDatabase = [];
-    
-    async function loadCloudDatabase() {
+    //    // --- Fitur Lihat Password ---
+    function togglePassword() {
+        const passInput = document.getElementById('login-password');
+        const icon = document.getElementById('toggle-icon');
+        
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            icon.classList.remove('ph-eye');
+            icon.classList.add('ph-eye-slash');
+        } else {
+            passInput.type = 'password';
+            icon.classList.remove('ph-eye-slash');
+            icon.classList.add('ph-eye');
+        }
+    }
+
+    //    // --- Authentication ---
+    async function handleLogin() {
+        const userInput = document.getElementById('login-username').value.trim().toLowerCase();
+        const passInput = document.getElementById('login-password').value.trim();
+
+        if (!userInput || !passInput) {
+            showLoginError("Username dan password harus diisi.");
+            return;
+        }
+
         const btn = document.getElementById('login-btn');
-        if(!btn) return;
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Menghubungkan Data...';
+        btn.innerHTML = '<i class="ph ph-spinner animate-spin text-xl"></i> Autentikasi...';
         btn.disabled = true;
         btn.classList.add('opacity-80', 'cursor-not-allowed');
 
+        let isValid = false;
+
         try {
-            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOnNbIG7xdGiUxsozYsJTeIZyS_0-u20nXZxW5Roruppg0c1wNRzON4E7rR1aK6ESmr9LO0j-ULAga/pub?gid=2007081756&single=true&output=csv';
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Network error');
-            const csvText = await response.text();
-            
-            window.pmbDatabase = parseCSV(csvText);
-            console.log("✅ Data dari Spreadsheet berhasil diload:", window.pmbDatabase.length, "baris");
-            
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            btn.classList.remove('opacity-80', 'cursor-not-allowed');
-        } catch (e) {
-            console.error("Gagal mengambil data Spreadsheet:", e);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            btn.classList.remove('opacity-80', 'cursor-not-allowed');
-        }
-    }
-
-    function parseCSV(str) {
-        const arr = [];
-        let quote = false;
-        let row = 0, col = 0, c = 0;
-        for (let row = 0, col = 0, c = 0; c < str.length; c++) {
-            let cc = str[c], nc = str[c+1];
-            arr[row] = arr[row] || [];
-            arr[row][col] = arr[row][col] || '';
-            if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
-            if (cc == '"') { quote = !quote; continue; }
-            if (cc == ',' && !quote) { ++col; continue; }
-            if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
-            if (cc == '\n' && !quote) { ++row; col = 0; continue; }
-            if (cc == '\r' && !quote) { ++row; col = 0; continue; }
-            arr[row][col] += cc;
-        }
-        const headers = arr[0].map(h => h.trim());
-        const data = [];
-        for (let i = 1; i < arr.length; i++) {
-            if(arr[i].length <= 1 && !arr[i][0]) continue;
-            let obj = {};
-            for (let j = 0; j < headers.length; j++) {
-                obj[headers[j]] = arr[i][j] ? arr[i][j].trim() : '';
-            }
-            data.push(obj);
-        }
-        return data;
-    }
-
-    window.addEventListener('DOMContentLoaded', loadCloudDatabase);
-
-    // --- Authentication ---
-    function handleLogin() {
-        const user = document.getElementById('login-username').value;
-        const pass = document.getElementById('login-password').value;
-
-        // Validasi menggunakan Data Spreadsheet CSV jika ada
-        let loggedInUser = null;
-        if (window.pmbDatabase && window.pmbDatabase.length > 0) {
-            loggedInUser = window.pmbDatabase.find(row => {
-                const keys = Object.keys(row);
-                const userKey = keys.find(k => k.toLowerCase().includes('username') || k.toLowerCase().includes('nisn'));
-                const passKey = keys.find(k => k.toLowerCase().includes('password') || k.toLowerCase().includes('pass'));
-                
-                if (userKey && passKey) {
-                    return (row[userKey] === user) && (row[passKey] === pass);
-                } else {
-                    const vals = Object.values(row);
-                    return vals.includes(user) && vals.includes(pass);
+            // Menggunakan sintaks wildcard '*' standar PostgREST (Supabase) untuk pencarian nama
+            const response = await fetch(`${SUPABASE_URL}pendaftar?nama_murid=ilike.*${userInput}*&select=*`, {
+                method: 'GET',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
                 }
             });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Validasi: Loop melalui hasil pencarian
+                if (data && data.length > 0) {
+                    for (let i = 0; i < data.length; i++) {
+                        const userData = data[i];
+                        const namaLengkap = userData.nama_murid || '';
+                        
+                        // Ekstrak kata pertama dari nama lengkap
+                        const kataPertama = namaLengkap.trim().split(/\s+/)[0].toLowerCase();
+                        
+                        // Ekstrak data 'no' sebagai string untuk disamakan dengan input password
+                        const passwordDb = String(userData.no); 
+                        
+                        // Menampilkan log di console browser untuk mempermudah perbaikan jika gagal
+                        console.log(`Cek Data -> Username DB: ${kataPertama} | Password DB (no): ${passwordDb}`);
+                        
+                        // Cek kecocokan username (kata pertama) dan password (no)
+                        if (kataPertama === userInput && passwordDb === passInput) {
+                            isValid = true;
+                            currentUser = userData; 
+                            break; 
+                        }
+                    }
+                } else {
+                    console.warn("Supabase merespon tapi data kosong (Mungkin terblokir RLS).");
+                }
+            } else {
+                console.warn('API Response tidak OK. Status:', response.status);
+            }
+        } catch (error) {
+            console.warn("Kesalahan jaringan (Gagal Fetch). Cek koneksi atau format API Key.", error);
+        }
+        
+        // Eksekusi fallback akun dummy jika fetch gagal / data di tabel kosong
+        if (!isValid && userInput === 'murid' && passInput === 'berkah') {
+            isValid = true;
+            currentUser = {
+                nama_murid: 'Ahmad Dummy',
+                no_ppdb: 'SPMB-2027-DUMMY',
+                jk: 'L',
+                tempat_lahir: 'Wonosobo',
+                tgl_lahir: '2019-05-14',
+                ayah: 'Budi Santoso', agama_ayah: 'Islam', pend_ayah: 'S1', pekrj_ayah: 'PNS',
+                ibu: 'Siti Aminah', agama_ibu: 'Islam', pend_ibu: 'D3', pekrj_ibu: 'Wiraswasta',
+                alamat: 'Jl. Sudagaran No.12, Wonosobo', tk: 'TK ABA Sudagaran',
+                mengenal_huruf: 85, mengenal_bilangan: 90, menggunting_dan_menempel_puzzel: 80,
+                melafalkan_surat_pendek_doa_harian: 95, menyanyi_lagu_nasional: 88, interview: 92
+            };
         }
 
-        if (loggedInUser || (user === 'murid' && pass === 'berkah')) {
+        // Kembalikan status tombol
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.classList.remove('opacity-80', 'cursor-not-allowed');
+
+        if (isValid) {
             loginError.classList.add('hidden');
+            updateDashboardUI(currentUser); // Memasukkan data ke Profil
             
-            if (loggedInUser) updateDashboardUI(loggedInUser);
-            
-            // Animasi transisi ke dashboard
+            // Animasi Transisi Halaman
             viewLogin.classList.remove('fade-enter-active');
             viewLogin.classList.add('fade-exit-active');
             
@@ -855,36 +991,82 @@
                 viewDashboard.classList.remove('hidden');
                 viewDashboard.classList.add('flex', 'fade-enter-active');
                 
-                // Render Menu setelah login berhasil
                 renderDynamicMenu();
                 
-                // Trigger animasi progress bar ulang agar terlihat
                 const pb = document.querySelector('.progress-animate');
-                pb.style.animation = 'none';
-                pb.offsetHeight; // trigger reflow
-                pb.style.animation = null;
+                if(pb) {
+                    pb.style.animation = 'none';
+                    pb.offsetHeight; 
+                    pb.style.animation = null;
+                }
             }, 300);
 
         } else {
-            loginError.classList.remove('hidden');
-            // Efek shake pada container login
-            const loginBox = viewLogin.querySelector('.bg-white');
-            loginBox.style.transform = 'translateX(-10px)';
-            setTimeout(() => loginBox.style.transform = 'translateX(10px)', 100);
-            setTimeout(() => loginBox.style.transform = 'translateX(-10px)', 200);
-            setTimeout(() => loginBox.style.transform = 'translateX(0)', 300);
+            showLoginError("Username atau password salah.");
+        }
+    }
+
+    function showLoginError(msg) {
+        loginError.innerText = msg;
+        loginError.classList.remove('hidden');
+        const loginBox = viewLogin.querySelector('.bg-white');
+        loginBox.style.transform = 'translateX(-10px)';
+        setTimeout(() => loginBox.style.transform = 'translateX(10px)', 100);
+        setTimeout(() => loginBox.style.transform = 'translateX(-10px)', 200);
+        setTimeout(() => loginBox.style.transform = 'translateX(0)', 300);
+    }
+
+    //    // Fungsi Format Tanggal
+    function formatDateIndo(dateStr) {
+        if (!dateStr) return '-';
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        try {
+            return new Date(dateStr).toLocaleDateString('id-ID', options);
+        } catch(e) {
+            return dateStr;
         }
     }
 
     function updateDashboardUI(userData) {
-        const keys = Object.keys(userData);
-        const nameKey = keys.find(k => k.toLowerCase().includes('nama'));
-        const nopendKey = keys.find(k => k.toLowerCase().includes('nomor') || k.toLowerCase().includes('pendaftaran'));
-        const waveKey = keys.find(k => k.toLowerCase().includes('gelombang'));
+        // Update Header Dashboard
+        if (userData.nama_murid) document.getElementById('user-name-display').innerText = userData.nama_murid;
+        if (userData.no_ppdb) document.getElementById('user-nopend-display').innerText = userData.no_ppdb;
+        document.getElementById('user-wave-display').innerText = "Gelombang Aktif";
         
-        if (nameKey && userData[nameKey]) document.getElementById('user-name-display').innerText = userData[nameKey];
-        if (nopendKey && userData[nopendKey]) document.getElementById('user-nopend-display').innerText = userData[nopendKey];
-        if (waveKey && userData[waveKey]) document.getElementById('user-wave-display').innerText = userData[waveKey];
+        // Update Modal Profil Siswa dengan Detail Lengkap
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val || '-';
+        };
+
+        setVal('prof-nama_murid', userData.nama_murid);
+        setVal('prof-no_ppdb', userData.no_ppdb);
+        
+        // Format Jenis Kelamin
+        let jk = userData.jk;
+        if (jk === 'L' || jk === 'l' || jk === 'Laki-laki') jk = 'Laki-laki';
+        else if (jk === 'P' || jk === 'p' || jk === 'Perempuan') jk = 'Perempuan';
+        setVal('prof-jk', jk);
+        
+        // Format Tempat & Tanggal Lahir (Digabungkan)
+        const tglLahir = formatDateIndo(userData.tgl_lahir);
+        const tempatLahir = userData.tempat_lahir || '-';
+        setVal('prof-ttl', `${tempatLahir}, ${tglLahir}`);
+        
+        setVal('prof-alamat', userData.alamat);
+        setVal('prof-tk', userData.tk);
+        
+        // Data Orang Tua - Ayah
+        setVal('prof-ayah', userData.ayah);
+        setVal('prof-agama_ayah', userData.agama_ayah);
+        setVal('prof-pend_ayah', userData.pend_ayah);
+        setVal('prof-pekrj_ayah', userData.pekrj_ayah);
+        
+        // Data Orang Tua - Ibu
+        setVal('prof-ibu', userData.ibu);
+        setVal('prof-agama_ibu', userData.agama_ibu);
+        setVal('prof-pend_ibu', userData.pend_ibu);
+        setVal('prof-pekrj_ibu', userData.pekrj_ibu);
     }
 
     // --- Rendering ---
@@ -962,15 +1144,28 @@
 
     // --- Chart.js Initialization ---
     function initChart() {
+        // Hapus chart lama jika ada agar tidak glitch saat modal dibuka ulang
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
         const ctx = document.getElementById('radarChart').getContext('2d');
         
+        // Memakai data riil dari Supabase, dengan nilai default fallback jika undefined/null
+        const mh = currentUser?.mengenal_huruf ?? 85;
+        const mb = currentUser?.mengenal_bilangan ?? 90;
+        const mm = currentUser?.menggunting_dan_menempel_puzzel ?? 80;
+        const dh = currentUser?.melafalkan_surat_pendek_doa_harian ?? 95;
+        const sp = currentUser?.menyanyi_lagu_nasional ?? 88; 
+        const inv = currentUser?.interview ?? 92;
+
         chartInstance = new Chart(ctx, {
             type: 'radar',
             data: {
                 labels: ['Mengenal Huruf', 'Mengenal Bilangan', 'Menggunting & Menempel', 'Doa Harian', 'Surat Pendek', 'Interview'],
                 datasets: [{
                     label: 'Skor Siswa',
-                    data: [85, 90, 80, 95, 88, 92],
+                    data: [mh, mb, mm, dh, sp, inv],
                     backgroundColor: 'rgba(217, 164, 65, 0.2)', // Gold with opacity
                     borderColor: '#D9A441', // Brand Gold
                     pointBackgroundColor: '#0F2747', // Brand Navy
