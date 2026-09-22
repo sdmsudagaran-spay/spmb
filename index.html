@@ -471,6 +471,7 @@
                             <span class="text-brand-gold font-bold" id="skor-huruf">0</span>
                         </div>
                         <div class="w-full bg-brand-bg rounded-full h-2"><div class="bg-brand-navy h-2 rounded-full transition-all duration-1000" id="bar-huruf" style="width: 0%"></div></div>
+                        <p class="text-[10px] text-brand-muted leading-relaxed mt-1.5 italic" id="ket-huruf"></p>
                     </div>
                     <div>
                         <div class="flex justify-between text-xs mb-1.5">
@@ -478,6 +479,7 @@
                             <span class="text-brand-gold font-bold" id="skor-bilangan">0</span>
                         </div>
                         <div class="w-full bg-brand-bg rounded-full h-2"><div class="bg-brand-navy h-2 rounded-full transition-all duration-1000" id="bar-bilangan" style="width: 0%"></div></div>
+                        <p class="text-[10px] text-brand-muted leading-relaxed mt-1.5 italic" id="ket-bilangan"></p>
                     </div>
                     <div>
                         <div class="flex justify-between text-xs mb-1.5">
@@ -485,20 +487,23 @@
                             <span class="text-brand-gold font-bold" id="skor-motorik">0</span>
                         </div>
                         <div class="w-full bg-brand-bg rounded-full h-2"><div class="bg-brand-navy h-2 rounded-full transition-all duration-1000" id="bar-motorik" style="width: 0%"></div></div>
+                        <p class="text-[10px] text-brand-muted leading-relaxed mt-1.5 italic" id="ket-motorik"></p>
                     </div>
                     <div>
                         <div class="flex justify-between text-xs mb-1.5">
-                            <span class="text-brand-navy font-medium">Doa Harian</span>
-                            <span class="text-brand-gold font-bold" id="skor-doa">0</span>
+                            <span class="text-brand-navy font-medium">Menyanyi Lagu Nasional</span>
+                            <span class="text-brand-gold font-bold" id="skor-menyanyi">0</span>
                         </div>
-                        <div class="w-full bg-brand-bg rounded-full h-2"><div class="bg-brand-navy h-2 rounded-full transition-all duration-1000" id="bar-doa" style="width: 0%"></div></div>
+                        <div class="w-full bg-brand-bg rounded-full h-2"><div class="bg-brand-navy h-2 rounded-full transition-all duration-1000" id="bar-menyanyi" style="width: 0%"></div></div>
+                        <p class="text-[10px] text-brand-muted leading-relaxed mt-1.5 italic" id="ket-menyanyi"></p>
                     </div>
                     <div>
                         <div class="flex justify-between text-xs mb-1.5">
-                            <span class="text-brand-navy font-medium">Surat Pendek</span>
-                            <span class="text-brand-gold font-bold" id="skor-surat">0</span>
+                            <span class="text-brand-navy font-medium">Melafalkan Surat & Doa</span>
+                            <span class="text-brand-gold font-bold" id="skor-agama">0</span>
                         </div>
-                        <div class="w-full bg-brand-bg rounded-full h-2"><div class="bg-brand-navy h-2 rounded-full transition-all duration-1000" id="bar-surat" style="width: 0%"></div></div>
+                        <div class="w-full bg-brand-bg rounded-full h-2"><div class="bg-brand-navy h-2 rounded-full transition-all duration-1000" id="bar-agama" style="width: 0%"></div></div>
+                        <p class="text-[10px] text-brand-muted leading-relaxed mt-1.5 italic" id="ket-agama"></p>
                     </div>
                     <div>
                         <div class="flex justify-between text-xs mb-1.5">
@@ -506,6 +511,7 @@
                             <span class="text-brand-gold font-bold" id="skor-interview">0</span>
                         </div>
                         <div class="w-full bg-brand-bg rounded-full h-2"><div class="bg-brand-navy h-2 rounded-full transition-all duration-1000" id="bar-interview" style="width: 0%"></div></div>
+                        <p class="text-[10px] text-brand-muted leading-relaxed mt-1.5 italic" id="ket-interview"></p>
                     </div>
                 </div>
             </div>
@@ -1153,32 +1159,52 @@
         if (!canvas) return; 
 
         const ctx = canvas.getContext('2d');
-        const mh = currentUser?.mengenal_huruf ?? 85;
-        const mb = currentUser?.mengenal_bilangan ?? 90;
-        const mm = currentUser?.menggunting_dan_menempel_puzzel ?? 80;
-        const dh = currentUser?.melafalkan_surat_pendek_doa_harian ?? 95;
-        const sp = currentUser?.menyanyi_lagu_nasional ?? 88; 
-        const inv = currentUser?.interview ?? 92;
+        
+        // Mengambil skor (jika data kosong/belum tes, default 0)
+        const mh = currentUser?.mengenal_huruf ?? 0;
+        const mb = currentUser?.mengenal_bilangan ?? 0;
+        const mm = currentUser?.menggunting_dan_menempel_puzzel ?? 0;
+        const mn = currentUser?.menyanyi_lagu_nasional ?? 0;
+        const ma = currentUser?.melafalkan_surat_pendek_doa_harian ?? 0; 
+        const inv = currentUser?.interview ?? 0;
 
-        const updateBar = (suffix, val) => {
+        // Mendapatkan nama panggilan (kata depan) dari nama murid
+        const namaPanggilan = currentUser?.nama_murid ? currentUser.nama_murid.trim().split(/\s+/)[0] : 'Siswa';
+
+        // Fungsi pembuat kesimpulan otomatis berdasarkan skor
+        function generateKeterangan(score, nama, indikator) {
+            const n = parseInt(score) || 0;
+            if (n <= 60) return `Ananda ${nama} masih perlu bimbingan dalam ${indikator}.`;
+            if (n <= 75) return `Ananda ${nama} sudah dapat ${indikator} namun masih perlu pendampingan.`;
+            if (n <= 89) return `Ananda ${nama} sudah lancar ${indikator} namun masih perlu sedikit pendampingan.`;
+            return `Ananda ${nama} sudah lancar ${indikator} dan mandiri.`;
+        }
+
+        const updateBar = (suffix, val, textIndikator) => {
             const valEl = document.getElementById(`skor-${suffix}`);
             const barEl = document.getElementById(`bar-${suffix}`);
+            const ketEl = document.getElementById(`ket-${suffix}`);
+            
             if (valEl) valEl.innerText = val;
             if (barEl) barEl.style.width = `${val}%`;
+            if (ketEl) ketEl.innerText = generateKeterangan(val, namaPanggilan, textIndikator);
         };
         
         setTimeout(() => {
-            updateBar('huruf', mh); updateBar('bilangan', mb);
-            updateBar('motorik', mm); updateBar('doa', dh);
-            updateBar('surat', sp); updateBar('interview', inv);
+            updateBar('huruf', mh, 'mengenal huruf'); 
+            updateBar('bilangan', mb, 'mengenal bilangan');
+            updateBar('motorik', mm, 'menggunting dan menempel'); 
+            updateBar('menyanyi', mn, 'menyanyi lagu nasional');
+            updateBar('agama', ma, 'melafalkan surat dan doa'); 
+            updateBar('interview', inv, 'interview');
         }, 100);
 
         chartInstance = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Mengenal Huruf', 'Mengenal Bilangan', 'Menggunting & Menempel', 'Doa Harian', 'Surat Pendek', 'Interview'],
+                labels: ['Mengenal Huruf', 'Mengenal Bilangan', 'Menggunting & Menempel', 'Menyanyi Lagu Nasional', 'Melafalkan Surat & Doa', 'Interview'],
                 datasets: [{
-                    label: 'Skor Siswa', data: [mh, mb, mm, dh, sp, inv],
+                    label: 'Skor Siswa', data: [mh, mb, mm, mn, ma, inv],
                     backgroundColor: 'rgba(217, 164, 65, 0.2)', borderColor: '#D9A441',
                     pointBackgroundColor: '#0F2747', pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#0F2747', borderWidth: 2,
