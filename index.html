@@ -107,6 +107,7 @@
         .bento-item { background: white; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .bento-2x2 { grid-column: span 2; grid-row: span 2; align-items: flex-start; text-align: left; justify-content: space-between; }
         .bento-2x1 { grid-column: span 2; flex-direction: row; justify-content: flex-start; gap: 12px; text-align: left; }
+        .bento-4x1 { grid-column: span 4; flex-direction: row; justify-content: flex-start; gap: 12px; text-align: left; }
 
         @keyframes fillProgress {
             from { width: 0; }
@@ -779,23 +780,6 @@
 
                     <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
                         <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-50">
-                            <i class="ph-fill ph-backpack text-orange-500 text-xl"></i>
-                            <h4 class="font-heading font-semibold text-brand-navy text-sm">Administrasi & Perlengkapan</h4>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Pengambilan Perlengkapan</p>
-                                <div id="prof-perlengkapan" class="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500 transition-colors">Belum</div>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Status PA / PI</p>
-                                <div id="prof-papi" class="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500 transition-colors">Belum</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
-                        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-50">
                             <i class="ph-fill ph-lock-key text-gray-700 text-xl"></i>
                             <h4 class="font-heading font-semibold text-brand-navy text-sm">Keamanan Akun</h4>
                         </div>
@@ -819,6 +803,62 @@
             </div>
         </div>
 
+        <div id="modal-perlengkapan" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[80%] slide-up flex flex-col pointer-events-auto">
+            <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
+                <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+            </div>
+            <div class="px-6 pb-4 bg-white flex justify-between items-center shrink-0 border-b border-gray-100">
+                <h2 class="font-heading font-bold text-lg text-brand-navy">Status Perlengkapan</h2>
+                <button onclick="closeAllModals()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 btn-press">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto no-scrollbar p-5 pb-10">
+                <div class="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-4 flex flex-col items-center text-center">
+                    <div class="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 mb-4 shadow-sm border border-orange-100">
+                        <i class="ph-fill ph-backpack text-4xl"></i>
+                    </div>
+                    <h3 class="font-heading font-bold text-lg text-brand-navy">Administrasi & Perlengkapan</h3>
+                    <p class="text-xs text-brand-muted mt-2 leading-relaxed">Pantau status pengambilan seragam, buku, dan pemenuhan administrasi kelengkapan ananda di sini.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex flex-col gap-3">
+                        <div class="flex items-center gap-3 mb-1">
+                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                                <i class="ph-fill ph-t-shirt text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-brand-navy">Pengambilan Perlengkapan</h4>
+                                <p class="text-[10px] text-brand-muted mt-0.5">Seragam, Buku, dll.</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-gray-50 pt-3">
+                            <span class="text-xs font-medium text-brand-navy">Status Saat Ini:</span>
+                            <div id="status-perlengkapan-baru" class="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500">Memuat...</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex flex-col gap-3">
+                        <div class="flex items-center gap-3 mb-1">
+                            <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
+                                <i class="ph-fill ph-user-list text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-brand-navy">Status Administrasi PA / PI</h4>
+                                <p class="text-[10px] text-brand-muted mt-0.5">Pendataan wali & siswa</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-gray-50 pt-3">
+                            <span class="text-xs font-medium text-brand-navy">Status Saat Ini:</span>
+                            <div id="status-papi-baru" class="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500">Memuat...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -832,7 +872,8 @@
         { id: 'timeline', title: 'Timeline', icon: 'ph-git-commit', color: 'text-brand-navy', bg: 'bg-blue-50', style: 'bento-2x2', action: "openModal('modal-timeline')" },
         { id: 'payment', title: 'Pembayaran', icon: 'ph-wallet', color: 'text-brand-gold', bg: 'bg-orange-50', style: 'bento-2x1', action: "openModal('modal-pembayaran')" },
         { id: 'docs', title: 'Dokumen', icon: 'ph-folder', color: 'text-green-600', bg: 'bg-green-50', style: 'bento-1x1', action: "openModal('modal-dokumen')" },
-        { id: 'profile', title: 'Profil Siswa', icon: 'ph-user-circle', color: 'text-purple-600', bg: 'bg-purple-50', style: 'bento-1x1', action: "openModal('modal-profil')" }
+        { id: 'profile', title: 'Profil Siswa', icon: 'ph-user-circle', color: 'text-purple-600', bg: 'bg-purple-50', style: 'bento-1x1', action: "openModal('modal-profil')" },
+        { id: 'perlengkapan', title: 'Status Perlengkapan', subtitle: 'Seragam & Administrasi', icon: 'ph-backpack', color: 'text-orange-500', bg: 'bg-orange-50', style: 'bento-4x1', action: "openModal('modal-perlengkapan')" }
     ];
 
     let chartInstance = null;
@@ -1022,7 +1063,7 @@
         safeSet('prof-pend_ibu', userData.pend_ibu || '-');
         safeSet('prof-pekrj_ibu', userData.pekrj_ibu || '-');
 
-        const perlengkapanBadge = document.getElementById('prof-perlengkapan');
+        const perlengkapanBadge = document.getElementById('status-perlengkapan-baru');
         if(perlengkapanBadge) {
             if(userData.perlengkapan) {
                 perlengkapanBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700";
@@ -1033,7 +1074,7 @@
             }
         }
 
-        const papiBadge = document.getElementById('prof-papi');
+        const papiBadge = document.getElementById('status-papi-baru');
         if(papiBadge) {
             if(userData.pa_pi) {
                 papiBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700";
@@ -1210,8 +1251,8 @@
 
             if (menu.style === 'bento-2x2') {
                 el.innerHTML = `<div class="w-12 h-12 rounded-full ${menu.bg} flex items-center justify-center ${menu.color} mb-2"><i class="ph-fill ${menu.icon} text-2xl"></i></div><div><h4 class="font-heading font-semibold text-brand-navy text-sm">${menu.title}</h4><p class="text-[10px] text-brand-muted mt-1">Pantau proses dari awal hingga akhir</p></div><div class="w-full flex justify-end mt-2 text-gray-300"><i class="ph-bold ph-arrow-up-right"></i></div>`;
-            } else if (menu.style === 'bento-2x1') {
-                 el.innerHTML = `<div class="w-10 h-10 rounded-full ${menu.bg} flex items-center justify-center ${menu.color} shrink-0"><i class="ph-fill ${menu.icon} text-xl"></i></div><div class="flex-1"><h4 class="font-heading font-semibold text-brand-navy text-sm">${menu.title}</h4><p class="text-[10px] text-brand-muted">Cek tagihan aktif</p></div>`;
+            } else if (menu.style === 'bento-2x1' || menu.style === 'bento-4x1') {
+                 el.innerHTML = `<div class="w-10 h-10 rounded-full ${menu.bg} flex items-center justify-center ${menu.color} shrink-0"><i class="ph-fill ${menu.icon} text-xl"></i></div><div class="flex-1"><h4 class="font-heading font-semibold text-brand-navy text-sm">${menu.title}</h4><p class="text-[10px] text-brand-muted">${menu.subtitle || 'Cek informasi lengkap'}</p></div>`;
             } else {
                 el.innerHTML = `<div class="w-10 h-10 rounded-full ${menu.bg} flex items-center justify-center ${menu.color} mb-2"><i class="ph-fill ${menu.icon} text-xl"></i></div><h4 class="font-semibold text-brand-navy text-[11px] leading-tight text-center">${menu.title}</h4>`;
             }
