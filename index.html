@@ -6,6 +6,7 @@
     <title>Smart PMB Sudagaran</title>
     
     <link rel="icon" type="image/png" href="https://iili.io/nuUTLcN.md.png">
+    <link rel="apple-touch-icon" href="https://iili.io/nuUTLcN.md.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -417,31 +418,9 @@
                     <i class="ph ph-x"></i>
                 </button>
             </div>
-            <div class="p-6 overflow-y-auto flex-1 space-y-4 no-scrollbar">
-                <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
-                            <i class="ph-fill ph-check-circle text-xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-semibold text-brand-navy">Kartu Keluarga (KK)</h4>
-                            <p class="text-[10px] text-green-600 font-medium">Terverifikasi</p>
-                        </div>
-                    </div>
-                    <button class="text-brand-gold text-xs font-medium px-3 py-1.5 bg-brand-goldlight rounded-lg">Lihat</button>
-                </div>
-                <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center">
-                            <i class="ph-fill ph-clock text-xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-semibold text-brand-navy">Akta Kelahiran</h4>
-                            <p class="text-[10px] text-yellow-600 font-medium">Menunggu Verifikasi</p>
-                        </div>
-                    </div>
-                    <button class="text-brand-gold text-xs font-medium px-3 py-1.5 bg-brand-goldlight rounded-lg">Ubah</button>
-                </div>
+            <div class="p-6 overflow-y-auto flex-1 space-y-4 no-scrollbar" id="dokumen-container">
+                <!-- Data akan di-generate oleh JS berdasarkan database Supabase -->
+                <div class="text-center text-xs text-brand-muted mt-10">Memuat dokumen...</div>
             </div>
         </div>
 
@@ -1057,6 +1036,61 @@
         safeSet('fin-total', formatRupiah(totalBersih));
         safeSet('fin-hero-total', formatRupiah(totalBersih));
         window.rawTotalTagihan = totalBersih;
+
+        const docContainer = document.getElementById('dokumen-container');
+        if (docContainer) {
+            let docHtml = '';
+            
+            // Konfigurasi Status KK
+            const kkUploaded = userData.unggah_kk ? true : false;
+            const kkVerified = userData.verifikasi_kk;
+            const kkTheme = kkVerified ? 'bg-green-50 text-green-600' : (kkUploaded ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-500');
+            const kkIcon = kkVerified ? 'ph-check-circle' : (kkUploaded ? 'ph-clock' : 'ph-upload-simple');
+            const kkStatus = kkVerified ? 'Terverifikasi' : (kkUploaded ? 'Menunggu Verifikasi' : 'Belum Diunggah');
+            const kkTextColor = kkVerified ? 'text-green-600' : (kkUploaded ? 'text-yellow-600' : 'text-red-500');
+            
+            docHtml += `
+            <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between card-hover">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg ${kkTheme} flex items-center justify-center">
+                        <i class="ph-fill ${kkIcon} text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-brand-navy">Kartu Keluarga (KK)</h4>
+                        <p class="text-[10px] ${kkTextColor} font-medium mt-0.5">${kkStatus}</p>
+                    </div>
+                </div>
+                <button class="text-brand-gold text-xs font-medium px-4 py-1.5 bg-brand-goldlight rounded-lg btn-press">
+                    ${kkUploaded ? 'Lihat' : 'Unggah'}
+                </button>
+            </div>`;
+
+            // Konfigurasi Status Akta
+            const aktaUploaded = userData.unggah_akta ? true : false;
+            const aktaVerified = userData.verifikasi_akta;
+            const aktaTheme = aktaVerified ? 'bg-green-50 text-green-600' : (aktaUploaded ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-500');
+            const aktaIcon = aktaVerified ? 'ph-check-circle' : (aktaUploaded ? 'ph-clock' : 'ph-upload-simple');
+            const aktaStatus = aktaVerified ? 'Terverifikasi' : (aktaUploaded ? 'Menunggu Verifikasi' : 'Belum Diunggah');
+            const aktaTextColor = aktaVerified ? 'text-green-600' : (aktaUploaded ? 'text-yellow-600' : 'text-red-500');
+
+            docHtml += `
+            <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between card-hover">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg ${aktaTheme} flex items-center justify-center">
+                        <i class="ph-fill ${aktaIcon} text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-brand-navy">Akta Kelahiran</h4>
+                        <p class="text-[10px] ${aktaTextColor} font-medium mt-0.5">${aktaStatus}</p>
+                    </div>
+                </div>
+                <button class="text-brand-gold text-xs font-medium px-4 py-1.5 bg-brand-goldlight rounded-lg btn-press">
+                    ${aktaUploaded ? 'Lihat' : 'Unggah'}
+                </button>
+            </div>`;
+
+            docContainer.innerHTML = docHtml;
+        }
 
         const riwayatSection = document.getElementById('fin-riwayat-section');
         const statusIcon = document.getElementById('icon-status-transaksi');
