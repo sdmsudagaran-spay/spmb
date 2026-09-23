@@ -116,6 +116,14 @@
         .progress-animate {
             animation: fillProgress 1s ease-out forwards;
         }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-float-up { animation: floatUp 0.8s ease-out forwards; }
+        .delay-200 { animation-delay: 0.2s; opacity: 0; }
+        .delay-400 { animation-delay: 0.4s; opacity: 0; }
     </style>
 </head>
 <body>
@@ -172,6 +180,29 @@
             <p class="text-center text-xs text-brand-muted mt-6">
                 Butuh bantuan? <a href="#" class="text-brand-gold font-medium">Hubungi Panitia</a>
             </p>
+        </div>
+    </div>
+
+    <div id="view-opening" class="hidden absolute inset-0 bg-brand-navy flex-col items-center justify-center p-8 z-[60] text-center transition-opacity duration-500">
+        <div class="absolute inset-0 opacity-5 pointer-events-none overflow-hidden">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <circle cx="50" cy="50" r="40" stroke="#D9A441" stroke-width="0.5" fill="none"/>
+                <circle cx="50" cy="50" r="30" stroke="#D9A441" stroke-width="0.2" fill="none"/>
+            </svg>
+        </div>
+        
+        <div class="relative z-10 w-full max-w-sm">
+            <i class="ph-fill ph-quotes text-brand-gold text-4xl mb-4 animate-float-up"></i>
+            <h2 id="opening-greeting" class="text-white font-heading font-bold text-xl mb-6 animate-float-up delay-200">
+                Selamat datang ananda...
+            </h2>
+            <p id="opening-quote" class="text-brand-goldlight text-sm leading-relaxed italic animate-float-up delay-400 font-medium">
+                "Quote here"
+            </p>
+            
+            <div class="mt-12 animate-float-up delay-400">
+                <div class="w-8 h-8 mx-auto border-2 border-brand-gold border-t-transparent rounded-full animate-spin"></div>
+            </div>
         </div>
     </div>
 
@@ -886,6 +917,19 @@
     const modalOverlay = document.getElementById('modal-overlay');
     const modals = document.querySelectorAll('.modal-content');
 
+    const quotesIlmu = [
+        "Menuntut ilmu itu wajib bagi setiap muslim. (HR. Ibnu Majah)",
+        "Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan memudahkan baginya jalan ke surga. (HR. Muslim)",
+        "Ilmu itu lebih baik daripada harta. Ilmu menjaga engkau dan engkau menjaga harta. (Ali bin Abi Thalib)",
+        "Barangsiapa menginginkan dunia, hendaklah dengan ilmu. Barangsiapa menginginkan akhirat, hendaklah dengan ilmu. (Syafi'i)",
+        "Tuntutlah ilmu dari buaian hingga ke liang lahat.",
+        "Ilmu adalah cahaya, dan cahaya Allah tidak akan diberikan kepada pelaku maksiat. (Imam Syafi'i)",
+        "Barangsiapa keluar dalam rangka menuntut ilmu, maka ia berada di jalan Allah sampai ia kembali. (HR. Tirmidzi)",
+        "Sebaik-baik kalian adalah yang mempelajari Al-Qur'an dan mengajarkannya. (HR. Bukhari)",
+        "Satu jam merenungkan ilmu lebih baik daripada ibadah sunnah satu tahun.",
+        "Ilmu tanpa amal bagaikan pohon yang tidak berbuah."
+    ];
+
     function togglePassword() {
         const passInput = document.getElementById('login-password');
         const icon = document.getElementById('toggle-icon');
@@ -982,21 +1026,43 @@
             loginError.classList.add('hidden');
             updateDashboardUI(currentUser); 
             
+            const namaPanggilan = currentUser.nama_murid ? currentUser.nama_murid.trim().split(/\s+/)[0] : 'Siswa';
+            const randomQuote = quotesIlmu[Math.floor(Math.random() * quotesIlmu.length)];
+            
+            document.getElementById('opening-greeting').innerText = `Selamat datang ananda ${namaPanggilan}`;
+            document.getElementById('opening-quote').innerText = `"${randomQuote}"`;
+            
             viewLogin.classList.remove('fade-enter-active');
             viewLogin.classList.add('fade-exit-active');
             
             setTimeout(() => {
                 viewLogin.classList.add('hidden');
-                viewDashboard.classList.remove('hidden');
-                viewDashboard.classList.add('flex', 'fade-enter-active');
-                renderDynamicMenu();
-                const pb = document.querySelector('.progress-animate');
-                if(pb) {
-                    pb.style.animation = 'none';
-                    pb.offsetHeight; 
-                    pb.style.animation = null;
-                }
-            }, 300);
+                
+                const viewOpening = document.getElementById('view-opening');
+                viewOpening.classList.remove('hidden');
+                viewOpening.classList.add('flex', 'fade-enter-active');
+                
+                setTimeout(() => {
+                    viewOpening.classList.remove('fade-enter-active');
+                    viewOpening.classList.add('fade-exit-active');
+                    
+                    setTimeout(() => {
+                        viewOpening.classList.add('hidden');
+                        viewOpening.classList.remove('flex', 'fade-exit-active');
+                        
+                        viewDashboard.classList.remove('hidden');
+                        viewDashboard.classList.add('flex', 'fade-enter-active');
+                        renderDynamicMenu();
+                        const pb = document.querySelector('.progress-animate');
+                        if(pb) {
+                            pb.style.animation = 'none';
+                            pb.offsetHeight; 
+                            pb.style.animation = null;
+                        }
+                    }, 500); // Durasi fade out opening
+                }, 3500); // Durasi tayang quote (3,5 detik)
+
+            }, 300); // Durasi fade out login
         } else {
             showLoginError("Username atau password salah.");
         }
