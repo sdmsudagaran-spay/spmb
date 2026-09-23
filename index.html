@@ -313,6 +313,22 @@
             </div>
 
             <div class="mb-6">
+                <h3 class="font-heading font-semibold text-brand-navy text-sm mb-3 px-1">Layanan Khusus</h3>
+                <div onclick="openModal('modal-perlengkapan')" class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-[20px] p-4 shadow-sm border border-orange-200 flex items-center justify-between card-hover cursor-pointer btn-press">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-sm shrink-0">
+                            <i class="ph-fill ph-backpack text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-heading font-bold text-brand-navy text-sm">Status Perlengkapan</h4>
+                            <p class="text-[10px] text-brand-muted mt-0.5">Cek Seragam & Administrasi PA/PI</p>
+                        </div>
+                    </div>
+                    <i class="ph-bold ph-caret-right text-orange-400"></i>
+                </div>
+            </div>
+
+            <div class="mb-6">
                 <h3 class="font-heading font-semibold text-brand-navy text-sm mb-3 px-1">Jadwal Terdekat</h3>
                 <div class="bg-gradient-to-r from-brand-navy to-[#1a3a6c] rounded-[20px] p-4 text-white shadow-premium relative overflow-hidden card-hover">
                     <i class="ph-fill ph-calendar-check absolute -right-4 -bottom-4 text-7xl text-white opacity-10"></i>
@@ -581,6 +597,17 @@
                             <p class="text-xs text-brand-navy mb-4 font-medium leading-relaxed relative z-10">
                                 Silakan lakukan transfer tepat sesuai <strong class="text-blue-700">Total Dibayar</strong> ke rekening resmi PMB di bawah ini:
                             </p>
+                            
+                            <!-- KOTAK SALIN NOMINAL SAAT LANJUT BAYAR -->
+                            <div class="bg-blue-600 rounded-xl p-4 mb-4 flex items-center justify-between relative z-10 shadow-sm text-white">
+                                <div>
+                                    <p class="text-[10px] text-blue-200 uppercase font-semibold">Nominal Transfer</p>
+                                    <p id="fin-nominal-transfer" class="font-heading font-bold text-lg mt-0.5">Rp 0</p>
+                                </div>
+                                <button onclick="copyText(window.rawTotalTagihan || '0', 'Nominal transfer berhasil disalin!')" class="btn-press bg-white/20 text-white p-2.5 rounded-xl hover:bg-white/30 transition-colors border border-white/20" title="Salin Nominal">
+                                    <i class="ph ph-copy text-xl"></i>
+                                </button>
+                            </div>
                             
                             <div class="bg-white rounded-xl p-4 border border-blue-100 mb-4 relative z-10 shadow-sm">
                                 <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
@@ -945,10 +972,10 @@
         safeSet('prof-pend_ibu', user.pend_ibu);
         safeSet('prof-pekrj_ibu', user.pekrj_ibu);
 
-        // 3. Administrasi & Perlengkapan (Diambil dari tabel perlengkapan / user gabungan)
+        // 3. Administrasi & Perlengkapan (Diambil dari tabel perlengkapan)
         const elPerlengkapan = document.getElementById('status-perlengkapan-baru');
         if (elPerlengkapan) {
-            if (user.ambil_souvenir) {
+            if (user.ambil_souvenir === true) {
                 elPerlengkapan.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700';
                 elPerlengkapan.innerText = 'Sudah Diambil';
             } else {
@@ -959,7 +986,7 @@
         
         const elPaPi = document.getElementById('status-papi-baru');
         if (elPaPi) {
-            if (user.s1) {
+            if (user.s1 === true) {
                 elPaPi.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700';
                 elPaPi.innerText = 'Lengkap';
             } else {
@@ -969,15 +996,21 @@
         }
 
         // 4. Keuangan (Menyesuaikan dengan BIGINT di Supabase)
-        const pendaftaran = parseInt(user.pendaftaran) || 200000;
-        const daftarUlang = parseInt(user.daftar_ulang) || 3780000;
-        const bopd = parseInt(user.bopd) || 9750000;
+        const pendaftaran = parseInt(user.pendaftaran) || 0;
+        
+        let daftarUlang = parseInt(user.daftar_ulang) || 0;
+        if (daftarUlang === 0) {
+            daftarUlang = (user.jk === 'P' || user.jk === 'p') ? 3850000 : 3780000;
+        }
+        
+        const bopd = parseInt(user.bopd) || 0;
         const earlyBird = parseInt(user.early_bird) || 0;
         const kaderAum = parseInt(user.kader_aum) || 0;
 
-        safeSet('fin-pendaftaran', formatRupiah(pendaftaran));
+        // Aturan Khusus: Tampilkan '-' jika pendaftaran 0, dan '=' jika BOPD 0
+        safeSet('fin-pendaftaran', pendaftaran === 0 ? '-' : formatRupiah(pendaftaran));
         safeSet('fin-daftar_ulang', formatRupiah(daftarUlang));
-        safeSet('fin-bopd', formatRupiah(bopd));
+        safeSet('fin-bopd', bopd === 0 ? '=' : formatRupiah(bopd));
 
         let totalDiskon = earlyBird + kaderAum;
         let totalTagihan = (pendaftaran + daftarUlang + bopd) - totalDiskon;
@@ -985,6 +1018,7 @@
 
         safeSet('fin-total', formatRupiah(totalTagihan));
         safeSet('fin-hero-total', formatRupiah(totalTagihan));
+        safeSet('fin-nominal-transfer', formatRupiah(totalTagihan)); // Tampil di instruksi bayar
 
         // Tampilkan Diskon jika ada
         const discSection = document.getElementById('fin-discount-section');
@@ -1093,7 +1127,19 @@
         }
     }
 
+    function showLoginError(msg) {
+        const errEl = document.getElementById('login-error');
+        if (errEl) {
+            errEl.innerText = msg;
+            errEl.classList.remove('hidden');
+        }
+    }
+
     async function handleLogin() {
+        // Sembunyikan error sebelumnya jika ada
+        const errEl = document.getElementById('login-error');
+        if (errEl) errEl.classList.add('hidden');
+
         const userInput = document.getElementById('login-username')?.value.trim().toLowerCase();
         const passInput = document.getElementById('login-password')?.value.trim();
 
@@ -1362,7 +1408,7 @@
                 document.getElementById('fin-bank-info')?.classList.add('hidden');
             }
 
-            if(id === 'modal-hasil' && !chartInstance) {
+            if(id === 'modal-hasil') {
                 setTimeout(initChart, 300); 
             }
         }
@@ -1385,7 +1431,6 @@
 
         const ctx = canvas.getContext('2d');
         
-        // Mengambil skor dari tabel analisis
         const mh = currentUser?.mengenal_huruf ?? 0;
         const mb = currentUser?.mengenal_bilangan ?? 0;
         const mm = currentUser?.menggunting_dan_menempel_puzzel ?? 0;
@@ -1393,14 +1438,14 @@
         const ma = currentUser?.melafalkan_surat_pendek_doa_harian ?? 0; 
         const inv = currentUser?.interview ?? 0;
 
-        // Mengambil teks keterangan dari tabel analisis
-        const ket_mh = currentUser?.ket_mengenal_huruf ?? 'Menunggu proses penilaian.';
-        const ket_mb = currentUser?.ket_mengenal_bilangan ?? 'Menunggu proses penilaian.';
-        const ket_mm = currentUser?.ket_menggunting_dan_menempel_puzzel ?? 'Menunggu proses penilaian.';
-        const ket_mn = currentUser?.ket_menyanyi_lagu_nasional ?? 'Menunggu proses penilaian.';
-        const ket_ma = currentUser?.ket_melafalkan_surat_pendek_doa_harian ?? 'Menunggu proses penilaian.';
-        const ket_inv = currentUser?.ket_interview ?? 'Menunggu proses penilaian.';
-
+        // Mengambil deskripsi langsung dari kolom-kolom tabel 'analisis' Supabase
+        const fallback = 'Belum ada catatan dari penguji.';
+        const ket_mh = currentUser?.ket_mengenal_huruf || fallback;
+        const ket_mb = currentUser?.ket_mengenal_bilangan || fallback;
+        const ket_mm = currentUser?.ket_menggunting_dan_menempel_puzzel || fallback;
+        const ket_mn = currentUser?.ket_menyanyi_lagu_nasional || fallback;
+        const ket_ma = currentUser?.ket_melafalkan_surat_pendek_doa_harian || fallback;
+        const ket_inv = currentUser?.ket_interview || fallback;
 
         const updateBar = (suffix, val, ketText) => {
             const valEl = document.getElementById(`skor-${suffix}`);
@@ -1433,8 +1478,19 @@
                 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
-                scales: { r: { ticks: { display: false, min: 0, max: 100 } } },
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { 
+                    r: { 
+                        beginAtZero: true,
+                        min: 0, 
+                        max: 100,
+                        ticks: { 
+                            display: false,
+                            stepSize: 10 
+                        } 
+                    } 
+                },
                 plugins: { legend: { display: false } }
             }
         });
@@ -1498,31 +1554,34 @@
 
         btn.disabled = true;
         btn.classList.replace('bg-blue-600', 'bg-blue-400');
-        icon.className = "ph ph-spinner animate-spin font-bold text-lg";
+        icon.className = "ph ph-spinner animate-spin text-lg";
         text.innerText = "Memproses file...";
 
-        // Gunakan FileReader untuk membaca gambar/file secara langsung (Preview)
         const reader = new FileReader();
         reader.onload = function(e) {
-            window.uploadedBuktiBase64 = e.target.result; // Simpan file dalam bentuk teks (Base64)
-            
             setTimeout(() => {
-                btn.classList.add('hidden'); 
-                const namaFile = document.getElementById('nama-file-bukti');
+                const base64 = e.target.result;
+                window.uploadedBuktiBase64 = base64;
+                
+                btn.classList.add('hidden');
+                
                 const previewContainer = document.getElementById('preview-bukti-container');
                 const imgPreview = document.getElementById('img-preview-bukti');
                 const pdfPreview = document.getElementById('icon-preview-pdf');
-
-                if(namaFile && previewContainer) {
-                    namaFile.innerText = file.name;
+                const nameLabel = document.getElementById('nama-file-bukti');
+                
+                if(previewContainer && nameLabel) {
+                    nameLabel.innerText = file.name;
                     
-                    // Cek apakah file berupa gambar atau dokumen
-                    if (file.type.startsWith('image/')) {
-                        if(imgPreview) { imgPreview.src = e.target.result; imgPreview.classList.remove('hidden'); }
-                        if(pdfPreview) pdfPreview.classList.add('hidden');
-                    } else {
+                    if(file.type === 'application/pdf') {
                         if(imgPreview) imgPreview.classList.add('hidden');
                         if(pdfPreview) pdfPreview.classList.remove('hidden');
+                    } else {
+                        if(pdfPreview) pdfPreview.classList.add('hidden');
+                        if(imgPreview) {
+                            imgPreview.src = base64;
+                            imgPreview.classList.remove('hidden');
+                        }
                     }
 
                     previewContainer.classList.remove('hidden');
@@ -1660,7 +1719,8 @@
         if (!currentUser) return;
         alertCustom("Menyinkronkan data...");
         try {
-            const response = await fetch(`${SUPABASE_URL}pendaftar?id=eq.${currentUser.id}&select=*`, {
+            // Tarik ulang data pendaftar sebagai base
+            const response = await fetch(`${SUPABASE_URL}pendaftar?no_ppdb=eq.${currentUser.no_ppdb}&select=*`, {
                 method: 'GET',
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
             });
@@ -1668,7 +1728,22 @@
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.length > 0) {
-                    currentUser = data[0];
+                    const userData = data[0];
+                    
+                    let keuData = {};
+                    try { const res = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) keuData = d[0]; } } catch(e) {}
+                    
+                    let analData = {};
+                    try { const res = await fetch(`${SUPABASE_URL}analisis?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) analData = d[0]; } } catch(e) {}
+                    
+                    let perData = {};
+                    try { const res = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) perData = d[0]; } } catch(e) {}
+                    
+                    currentUser = { ...userData, ...keuData, ...analData, ...perData };
+                    updateDashboardUI(currentUser);
+                    alertCustom("Data berhasil diperbarui dari server!");
+                    // Gabungkan semua data persis seperti saat Login, sehingga data keuangan terupdate sempurna
+                    currentUser = { ...userData, ...keuData, ...analData, ...perData };
                     updateDashboardUI(currentUser);
                     alertCustom("Data berhasil diperbarui!");
                 }
