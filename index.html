@@ -830,6 +830,12 @@
                         </div>
                     </div>
 
+                    <!-- TOMBOL KELUAR APLIKASI -->
+                    <button onclick="handleLogout()" class="w-full bg-red-50 text-red-600 font-semibold rounded-[20px] py-4 mt-2 border border-red-100 flex justify-center items-center gap-2 btn-press hover:bg-red-100 transition-colors shadow-sm">
+                        <i class="ph-bold ph-sign-out text-lg"></i>
+                        Keluar Aplikasi
+                    </button>
+
                 </div>
             </div>
         </div>
@@ -1727,7 +1733,7 @@
                 </body>
                 </html>
             `;
-            printWindow.document.write(htmlContent);
+            printWindow.document.write(html);
             printWindow.document.close();
             
             /* Menambahkan script print secara terpisah agar tidak merusak parser HTML utama */
@@ -1738,6 +1744,36 @@
         } catch (error) {
             alertCustom("Gagal memuat sistem cetak.");
         }
+    }
+
+    // FUNGSI LOGOUT (KELUAR APLIKASI)
+    function handleLogout() {
+        closeAllModals(); // Menutup jendela profil
+        
+        setTimeout(() => {
+            // Hapus data sesi siswa
+            currentUser = null;
+            
+            // Bersihkan kolom password (agar tidak bisa langsung ditekan masuk lagi)
+            const passInput = document.getElementById('login-password');
+            if (passInput) passInput.value = '';
+            
+            // Sembunyikan Dashboard
+            const viewDashboard = document.getElementById('view-dashboard');
+            viewDashboard.classList.remove('flex', 'fade-enter-active');
+            viewDashboard.classList.add('hidden');
+            
+            // Tampilkan kembali layar Login
+            const viewLogin = document.getElementById('view-login');
+            viewLogin.classList.remove('hidden', 'fade-exit-active');
+            viewLogin.classList.add('flex', 'fade-enter-active');
+            
+            // Reset Progress Bar agar jika ada user lain masuk animasinya termuat ulang
+            const pb = document.querySelector('.progress-animate');
+            if(pb) { pb.style.animation = 'none'; }
+            
+            alertCustom("Anda telah keluar dari sistem.");
+        }, 400); // Menunggu durasi animasi modal tertutup
     }
 
 </script>
