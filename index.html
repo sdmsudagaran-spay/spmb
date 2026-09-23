@@ -336,31 +336,16 @@
 
             <div>
                 <div class="flex justify-between items-center mb-3 px-1">
-                    <h3 class="font-heading font-semibold text-brand-navy text-sm">Pengumuman Terbaru</h3>
-                    <a href="#" class="text-xs text-brand-gold font-medium">Lihat Semua</a>
-                </div>
-                <div class="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar -mx-5 px-5">
-                    <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md">INFO</span>
-                            <span class="text-[10px] text-brand-muted">2 Jam yang lalu</span>
-                        </div>
-                        <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">Verifikasi Berkas Gelombang Sedang Diproses</h4>
-                        <p class="text-xs text-brand-muted line-clamp-2">Mohon menunggu maksimal 2x24 jam hari kerja untuk hasil verifikasi.</p>
-                    </div>
-
-                    <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded-md">PENTING</span>
-                            <span class="text-[10px] text-brand-muted">Kemarin</span>
-                        </div>
-                        <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">Persiapan Tes Kesiapan Belajar</h4>
-                        <p class="text-xs text-brand-muted line-clamp-2">Peserta diwajibkan membawa alat tulis lengkap dan id card sementara.</p>
-                    </div>
-                </div>
+                <h3 class="font-heading font-semibold text-brand-navy text-sm">Pengumuman Terbaru</h3>
+                <a href="#" class="text-xs text-brand-gold font-medium">Lihat Semua</a>
             </div>
-            
-            <div class="h-10"></div>
+            <div class="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar -mx-5 px-5" id="pengumuman-container">
+                <!-- Data Pengumuman Akan Di-generate Disini -->
+                <div class="text-xs text-brand-muted italic py-4">Memuat pengumuman...</div>
+            </div>
+        </div>
+        
+        <div class="h-10"></div>
         </div>
 
         <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 rounded-b-[40px] px-6 py-3 flex justify-between items-center z-30 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
@@ -406,36 +391,9 @@
             </div>
             
             <div class="p-6 overflow-y-auto flex-1">
-                <div class="relative border-l-2 border-gray-100 ml-4 space-y-8 pb-8">
-                    <div class="relative pl-6">
-                        <div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
-                            <i class="ph-bold ph-check text-white text-[10px]"></i>
-                        </div>
-                        <h4 class="font-semibold text-brand-navy text-sm">Pendaftaran Online</h4>
-                        <p class="text-xs text-brand-muted mt-1">Berhasil disimpan</p>
-                    </div>
-
-                    <div class="relative pl-6">
-                        <div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
-                            <i class="ph-bold ph-check text-white text-[10px]"></i>
-                        </div>
-                        <h4 class="font-semibold text-brand-navy text-sm">Melengkapi Dokumen</h4>
-                        <p class="text-xs text-brand-muted mt-1">Dokumen diunggah</p>
-                    </div>
-
-                    <div class="relative pl-6">
-                        <div class="absolute -left-[13px] top-0 w-6 h-6 bg-brand-gold rounded-full border-4 border-white shadow-sm flex items-center justify-center animate-pulse">
-                            <div class="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                        <h4 class="font-semibold text-brand-navy text-sm">Verifikasi Berkas</h4>
-                        <p class="text-xs text-brand-muted mt-1">Sedang diproses oleh panitia.</p>
-                    </div>
-
-                    <div class="relative pl-6 opacity-50">
-                        <div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>
-                        <h4 class="font-semibold text-brand-navy text-sm">Tes Kesiapan Belajar</h4>
-                        <p class="text-xs text-brand-muted mt-1">Menunggu Jadwal</p>
-                    </div>
+                <div class="relative border-l-2 border-gray-100 ml-4 space-y-8 pb-8" id="timeline-container">
+                    <!-- Data Timeline Akan Di-generate Disini -->
+                    <div class="text-xs text-brand-muted text-center pt-10">Memuat timeline...</div>
                 </div>
             </div>
         </div>
@@ -905,14 +863,8 @@
     const SUPABASE_URL = 'https://ckbarwrfpktcdoydbjzy.supabase.co/rest/v1/';
     const SUPABASE_KEY = 'sb_publishable_jBXJV3WzlzbTlRkpEqGebA_BOlcBWoO';
 
-    const dynamicMenus = [
-        { id: 'timeline', title: 'Timeline', icon: 'ph-git-commit', color: 'text-brand-navy', bg: 'bg-blue-50', style: 'bento-2x2', action: "openModal('modal-timeline')" },
-        { id: 'payment', title: 'Pembayaran', icon: 'ph-wallet', color: 'text-brand-gold', bg: 'bg-orange-50', style: 'bento-2x1', action: "openModal('modal-pembayaran')" },
-        { id: 'docs', title: 'Dokumen', icon: 'ph-folder', color: 'text-green-600', bg: 'bg-green-50', style: 'bento-1x1', action: "openModal('modal-dokumen')" },
-        { id: 'profile', title: 'Profil Siswa', icon: 'ph-user-circle', color: 'text-purple-600', bg: 'bg-purple-50', style: 'bento-1x1', action: "openModal('modal-profil')" },
-        { id: 'perlengkapan', title: 'Status Perlengkapan', subtitle: 'Seragam & Administrasi', icon: 'ph-backpack', color: 'text-orange-500', bg: 'bg-orange-50', style: 'bento-4x1', action: "openModal('modal-perlengkapan')" }
-    ];
-
+    let dynamicMenus = [];
+    
     let chartInstance = null;
     let currentUser = null; 
 
@@ -949,6 +901,210 @@
             passInput.type = 'password';
             icon.classList.remove('ph-eye-slash');
             icon.classList.add('ph-eye');
+        }
+    }
+
+    function formatRupiah(angka) {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
+    }
+
+    function updateDashboardUI(user) {
+        if (!user) return;
+
+        // 1. Dashboard Info
+        const namaPanggilan = user.nama_murid ? user.nama_murid.trim().split(/\s+/)[0] : 'Siswa';
+        const elUserName = document.getElementById('user-name-display');
+        if(elUserName) elUserName.innerText = namaPanggilan;
+        
+        const elNoPend = document.getElementById('user-nopend-display');
+        if(elNoPend) elNoPend.innerText = user.no_ppdb || '-';
+        
+        const elDashRuang = document.getElementById('dash-ruang');
+        if(elDashRuang) elDashRuang.innerText = user.ruang || 'Menunggu Jadwal';
+        
+        const elHasilRuang = document.getElementById('hasil-ruang');
+        if(elHasilRuang) elHasilRuang.innerText = user.ruang || 'Menunggu Jadwal';
+
+        // 2. Profil Siswa
+        const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val || '-'; };
+        
+        safeSet('prof-nama_murid', user.nama_murid);
+        safeSet('prof-no_ppdb', user.no_ppdb);
+        safeSet('prof-jk', user.jk === 'L' ? 'Laki-laki' : (user.jk === 'P' ? 'Perempuan' : '-'));
+        safeSet('prof-ttl', (user.tempat_lahir || '-') + ', ' + (user.tgl_lahir || '-'));
+        safeSet('prof-alamat', user.alamat);
+        safeSet('prof-tk', user.tk);
+
+        safeSet('prof-ayah', user.ayah);
+        safeSet('prof-agama_ayah', user.agama_ayah);
+        safeSet('prof-pend_ayah', user.pend_ayah);
+        safeSet('prof-pekrj_ayah', user.pekrj_ayah);
+
+        safeSet('prof-ibu', user.ibu);
+        safeSet('prof-agama_ibu', user.agama_ibu);
+        safeSet('prof-pend_ibu', user.pend_ibu);
+        safeSet('prof-pekrj_ibu', user.pekrj_ibu);
+
+        // 3. Administrasi & Perlengkapan
+        const elPerlengkapan = document.getElementById('status-perlengkapan-baru');
+        if (elPerlengkapan) {
+            if (user.perlengkapan) {
+                elPerlengkapan.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700';
+                elPerlengkapan.innerText = 'Sudah Diambil';
+            } else {
+                elPerlengkapan.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-yellow-100 text-yellow-700';
+                elPerlengkapan.innerText = 'Belum Diambil';
+            }
+        }
+        
+        const elPaPi = document.getElementById('status-papi-baru');
+        if (elPaPi) {
+            if (user.pa_pi) {
+                elPaPi.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700';
+                elPaPi.innerText = 'Lengkap';
+            } else {
+                elPaPi.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500';
+                elPaPi.innerText = 'Belum Diproses';
+            }
+        }
+
+        // 4. Keuangan
+        const pendaftaran = parseInt(user.pendaftaran) || 0;
+        const daftarUlang = parseInt(user.daftar_ulang) || 0;
+        const bopd = parseInt(user.bopd) || 0;
+        const bopdLain = parseInt(user.bopd_lainnya) || 0;
+        const earlyBird = parseInt(user.early_bird) || 0;
+        const kaderAum = parseInt(user.kader_aum) || 0;
+
+        safeSet('fin-pendaftaran', formatRupiah(pendaftaran));
+        safeSet('fin-daftar_ulang', formatRupiah(daftarUlang));
+        safeSet('fin-bopd', formatRupiah(bopd));
+
+        let totalDiskon = earlyBird + kaderAum;
+        let totalTagihan = (pendaftaran + daftarUlang + bopd + bopdLain) - totalDiskon;
+        window.rawTotalTagihan = totalTagihan.toString(); // untuk fitur copy
+
+        safeSet('fin-total', formatRupiah(totalTagihan));
+        safeSet('fin-hero-total', formatRupiah(totalTagihan));
+
+        // Tampilkan Diskon jika ada
+        const discSection = document.getElementById('fin-discount-section');
+        const discContainer = document.getElementById('fin-discount-container');
+        if (discSection && discContainer) {
+            if (totalDiskon > 0) {
+                discSection.classList.remove('hidden');
+                let discHtml = '';
+                if(earlyBird > 0) discHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-gold font-medium">Potongan Early Bird</span><span class="font-bold text-brand-gold">-${formatRupiah(earlyBird)}</span></div>`;
+                if(kaderAum > 0) discHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-gold font-medium">Kader AUM</span><span class="font-bold text-brand-gold">-${formatRupiah(kaderAum)}</span></div>`;
+                discContainer.innerHTML = discHtml;
+            } else {
+                discSection.classList.add('hidden');
+            }
+        }
+
+        // Tampilkan Angsuran jika ada
+        const angsSection = document.getElementById('fin-angsuran-section');
+        const angsContainer = document.getElementById('fin-angsuran-container');
+        const b1 = parseInt(user.bopd1)||0, b2 = parseInt(user.bopd2)||0, b3 = parseInt(user.bopd3)||0;
+        
+        if (angsSection && angsContainer) {
+            if (b1 > 0 || b2 > 0 || b3 > 0) {
+                angsSection.classList.remove('hidden');
+                let angsHtml = '';
+                if(b1 > 0) angsHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted">Angsuran 1 <span class="text-[10px]">(${user.ketbopd1 || '-'})</span></span><span class="font-medium text-brand-navy">${formatRupiah(b1)}</span></div>`;
+                if(b2 > 0) angsHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted">Angsuran 2 <span class="text-[10px]">(${user.ketbopd2 || '-'})</span></span><span class="font-medium text-brand-navy">${formatRupiah(b2)}</span></div>`;
+                if(b3 > 0) angsHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted">Angsuran 3 <span class="text-[10px]">(${user.ketbopd3 || '-'})</span></span><span class="font-medium text-brand-navy">${formatRupiah(b3)}</span></div>`;
+                angsContainer.innerHTML = angsHtml;
+            } else {
+                angsSection.classList.add('hidden');
+            }
+        }
+
+        // 5. Riwayat Transaksi
+        const riwayatSection = document.getElementById('fin-riwayat-section');
+        const iconStatus = document.getElementById('icon-status-transaksi');
+        const textStatus = document.getElementById('teks-status-transaksi');
+        const textKasir = document.getElementById('teks-kasir');
+        const btnUnduh = document.getElementById('btn-unduh-struk');
+        const btnLanjutBayar = document.getElementById('btn-lanjut-bayar');
+        
+        if (riwayatSection && iconStatus && textStatus && textKasir && btnUnduh) {
+            if (user.bukti_transfer || user.konfirmasi) {
+                riwayatSection.classList.remove('hidden');
+                if(btnLanjutBayar) btnLanjutBayar.classList.add('hidden');
+                
+                if (user.konfirmasi) {
+                    iconStatus.className = "w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center shrink-0 text-green-600";
+                    iconStatus.innerHTML = '<i class="ph-fill ph-check-circle text-2xl"></i>';
+                    textStatus.innerText = "Berhasil & Dikonfirmasi";
+                    textStatus.className = "text-[10px] font-bold text-green-600 mt-0.5";
+                    
+                    textKasir.classList.remove('hidden');
+                    const spanKasir = textKasir.querySelector('span');
+                    if(spanKasir) spanKasir.innerText = user.kasir || 'Admin';
+                    
+                    btnUnduh.classList.remove('hidden');
+                    btnUnduh.onclick = () => unduhStruk(user);
+                } else {
+                    iconStatus.className = "w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center shrink-0 text-yellow-600";
+                    iconStatus.innerHTML = '<i class="ph-fill ph-clock text-2xl"></i>';
+                    textStatus.innerText = "Menunggu Verifikasi Admin";
+                    textStatus.className = "text-[10px] font-bold text-yellow-600 mt-0.5";
+                    
+                    textKasir.classList.add('hidden');
+                    btnUnduh.classList.add('hidden');
+                }
+            } else {
+                riwayatSection.classList.add('hidden');
+                if(btnLanjutBayar) btnLanjutBayar.classList.remove('hidden');
+            }
+        }
+
+        // 6. Dokumen 
+        const dokContainer = document.getElementById('dokumen-container');
+        if(dokContainer) {
+            let htmlDok = '';
+            
+            // Logika KK
+            let iconKk = 'ph-file-dashed'; let colorKk = 'text-red-500'; let bgKk = 'bg-red-50'; let statusKk = 'Belum Diunggah'; let textBtnKk = 'Unggah';
+            if(user.verifikasi_kk) { iconKk = 'ph-check-circle'; colorKk = 'text-green-500'; bgKk = 'bg-green-50'; statusKk = 'Terverifikasi'; textBtnKk = 'Lihat'; }
+            else if (user.unggah_kk) { iconKk = 'ph-clock'; colorKk = 'text-yellow-500'; bgKk = 'bg-yellow-50'; statusKk = 'Menunggu Verifikasi'; textBtnKk = 'Lihat'; }
+            
+            htmlDok += `
+                <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg ${bgKk} flex items-center justify-center ${colorKk} shrink-0">
+                            <i class="ph-fill ${iconKk} text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-brand-navy">Kartu Keluarga (KK)</h4>
+                            <p class="text-[10px] font-medium ${colorKk} mt-0.5">${statusKk}</p>
+                        </div>
+                    </div>
+                    <button class="bg-brand-bg text-brand-navy text-xs font-semibold px-3 py-1.5 rounded-lg btn-press">${textBtnKk}</button>
+                </div>
+            `;
+
+            // Logika Akta
+            let iconAkta = 'ph-file-dashed'; let colorAkta = 'text-red-500'; let bgAkta = 'bg-red-50'; let statusAkta = 'Belum Diunggah'; let textBtnAkta = 'Unggah';
+            if(user.verifikasi_akta) { iconAkta = 'ph-check-circle'; colorAkta = 'text-green-500'; bgAkta = 'bg-green-50'; statusAkta = 'Terverifikasi'; textBtnAkta = 'Lihat'; }
+            else if (user.unggah_akta) { iconAkta = 'ph-clock'; colorAkta = 'text-yellow-500'; bgAkta = 'bg-yellow-50'; statusAkta = 'Menunggu Verifikasi'; textBtnAkta = 'Lihat'; }
+            
+            htmlDok += `
+                <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg ${bgAkta} flex items-center justify-center ${colorAkta} shrink-0">
+                            <i class="ph-fill ${iconAkta} text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-brand-navy">Akta Kelahiran</h4>
+                            <p class="text-[10px] font-medium ${colorAkta} mt-0.5">${statusAkta}</p>
+                        </div>
+                    </div>
+                    <button class="bg-brand-bg text-brand-navy text-xs font-semibold px-3 py-1.5 rounded-lg btn-press">${textBtnAkta}</button>
+                </div>
+            `;
+            dokContainer.innerHTML = htmlDok;
         }
     }
 
@@ -1032,6 +1188,8 @@
             loginError.classList.add('hidden');
             updateDashboardUI(currentUser); 
             
+            loadDataSistem();
+            
             const namaPanggilan = currentUser.nama_murid ? currentUser.nama_murid.trim().split(/\s+/)[0] : 'Siswa';
             const randomQuote = quotesIlmu[Math.floor(Math.random() * quotesIlmu.length)];
             
@@ -1058,7 +1216,7 @@
                         
                         viewDashboard.classList.remove('hidden');
                         viewDashboard.classList.add('flex', 'fade-enter-active');
-                        renderDynamicMenu();
+                        // renderDynamicMenu() kini dipanggil setelah loadDataSistem selesai
                         const pb = document.querySelector('.progress-animate');
                         if(pb) {
                             pb.style.animation = 'none';
@@ -1074,241 +1232,99 @@
         }
     }
 
-    function showLoginError(msg) {
-        if (!loginError || !viewLogin) return;
-        loginError.innerText = msg;
-        loginError.classList.remove('hidden');
-        const loginBox = viewLogin.querySelector('.bg-white');
-        if(loginBox) {
-            loginBox.style.transform = 'translateX(-10px)';
-            setTimeout(() => loginBox.style.transform = 'translateX(10px)', 100);
-            setTimeout(() => loginBox.style.transform = 'translateX(-10px)', 200);
-            setTimeout(() => loginBox.style.transform = 'translateX(0)', 300);
-        }
-    }
-
-    function formatDateIndo(dateStr) {
-        if (!dateStr) return '-';
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        try { return new Date(dateStr).toLocaleDateString('id-ID', options); } 
-        catch(e) { return dateStr; }
-    }
-
-    function formatRupiah(angka) {
-        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
-    }
-
-    function updateDashboardUI(userData) {
-        if (!userData) return;
-        
-        const safeSet = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.innerText = val;
-        };
-
-        safeSet('user-name-display', userData.nama_murid || 'Siswa');
-        safeSet('user-nopend-display', userData.no_ppdb || '-');
-        safeSet('user-wave-display', "Gelombang Aktif");
-        safeSet('dash-ruang', userData.ruang || 'Menunggu Jadwal');
-        safeSet('hasil-ruang', userData.ruang || 'Menunggu Jadwal');
-        
-        safeSet('prof-nama_murid', userData.nama_murid || '-');
-        safeSet('prof-no_ppdb', userData.no_ppdb || '-');
-        
-        let jk = userData.jk;
-        if (jk === 'L' || jk === 'l' || jk === 'Laki-laki') jk = 'Laki-laki';
-        else if (jk === 'P' || jk === 'p' || jk === 'Perempuan') jk = 'Perempuan';
-        safeSet('prof-jk', jk || '-');
-        
-        const tglLahir = formatDateIndo(userData.tgl_lahir);
-        const tempatLahir = userData.tempat_lahir || '-';
-        safeSet('prof-ttl', `${tempatLahir}, ${tglLahir}`);
-        
-        safeSet('prof-alamat', userData.alamat || '-');
-        safeSet('prof-tk', userData.tk || '-');
-        safeSet('prof-ayah', userData.ayah || '-');
-        safeSet('prof-agama_ayah', userData.agama_ayah || '-');
-        safeSet('prof-pend_ayah', userData.pend_ayah || '-');
-        safeSet('prof-pekrj_ayah', userData.pekrj_ayah || '-');
-        safeSet('prof-ibu', userData.ibu || '-');
-        safeSet('prof-agama_ibu', userData.agama_ibu || '-');
-        safeSet('prof-pend_ibu', userData.pend_ibu || '-');
-        safeSet('prof-pekrj_ibu', userData.pekrj_ibu || '-');
-
-        const perlengkapanBadge = document.getElementById('status-perlengkapan-baru');
-        if(perlengkapanBadge) {
-            if(userData.perlengkapan) {
-                perlengkapanBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700";
-                perlengkapanBadge.innerHTML = "<i class='ph-bold ph-check mr-1'></i>Sudah Diambil";
-            } else {
-                perlengkapanBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-yellow-100 text-yellow-700";
-                perlengkapanBadge.innerHTML = "<i class='ph-bold ph-clock mr-1'></i>Belum Diambil";
-            }
-        }
-
-        const papiBadge = document.getElementById('status-papi-baru');
-        if(papiBadge) {
-            if(userData.pa_pi) {
-                papiBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700";
-                papiBadge.innerHTML = "<i class='ph-bold ph-check mr-1'></i>Selesai";
-            } else {
-                papiBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500";
-                papiBadge.innerHTML = "<i class='ph-bold ph-minus mr-1'></i>Belum Selesai";
-            }
-        }
-
-        const pendaftaran = parseFloat(userData.pendaftaran || 0);
-        const daftarUlang = parseFloat(userData.daftar_ulang || 0);
-        const bopd = parseFloat(userData.bopd || 0);
-        
-        const earlyBird = parseFloat(userData.early_bird || 0);
-        const kaderAum = parseFloat(userData.kader_aum || 0);
-        const khususLainnya = parseFloat(userData.bopd_lainnya || 0);
-        
-        const bopd1 = parseFloat(userData.bopd1 || 0); const ket1 = userData.ketbopd1 || '-';
-        const bopd2 = parseFloat(userData.bopd2 || 0); const ket2 = userData.ketbopd2 || '-';
-        const bopd3 = parseFloat(userData.bopd3 || 0); const ket3 = userData.ketbopd3 || '-';
-
-        safeSet('fin-pendaftaran', formatRupiah(pendaftaran));
-        safeSet('fin-daftar_ulang', formatRupiah(daftarUlang));
-        safeSet('fin-bopd', formatRupiah(bopd));
-
-        let discountHtml = '';
-        if (earlyBird > 0) discountHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted flex items-center gap-1"><i class="ph-fill ph-tag text-green-500"></i> Early Bird</span><span class="font-medium text-green-600">- ${formatRupiah(earlyBird)}</span></div>`;
-        if (kaderAum > 0) discountHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted flex items-center gap-1"><i class="ph-fill ph-tag text-green-500"></i> Kader AUM</span><span class="font-medium text-green-600">- ${formatRupiah(kaderAum)}</span></div>`;
-        if (khususLainnya > 0) {
-            let ketKhusus = userData.ket_keringanan ? `(${userData.ket_keringanan})` : 'Khusus';
-            discountHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted flex items-center gap-1"><i class="ph-fill ph-tag text-green-500"></i> ${ketKhusus}</span><span class="font-medium text-green-600">- ${formatRupiah(khususLainnya)}</span></div>`;
-        }
-        
-        const discSection = document.getElementById('fin-discount-section');
-        const discContainer = document.getElementById('fin-discount-container');
-        if (discSection && discContainer) {
-            if (discountHtml !== '') {
-                discContainer.innerHTML = discountHtml;
-                discSection.classList.remove('hidden');
-            } else {
-                discSection.classList.add('hidden');
-            }
-        }
-
-        let angsuranHtml = '';
-        if (bopd1 > 0) angsuranHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted">Angsuran 1 <span class="text-[10px] block mt-0.5">${ket1}</span></span><span class="font-medium text-brand-navy">${formatRupiah(bopd1)}</span></div>`;
-        if (bopd2 > 0) angsuranHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted">Angsuran 2 <span class="text-[10px] block mt-0.5">${ket2}</span></span><span class="font-medium text-brand-navy">${formatRupiah(bopd2)}</span></div>`;
-        if (bopd3 > 0) angsuranHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-muted">Angsuran 3 <span class="text-[10px] block mt-0.5">${ket3}</span></span><span class="font-medium text-brand-navy">${formatRupiah(bopd3)}</span></div>`;
-
-        const angsSection = document.getElementById('fin-angsuran-section');
-        const angsContainer = document.getElementById('fin-angsuran-container');
-        if (angsSection && angsContainer) {
-            if (angsuranHtml !== '') {
-                angsContainer.innerHTML = angsuranHtml;
-                angsSection.classList.remove('hidden');
-            } else {
-                angsSection.classList.add('hidden');
-            }
-        }
-
-        const totalBersih = (pendaftaran + daftarUlang + bopd) - (earlyBird + kaderAum + khususLainnya);
-        safeSet('fin-total', formatRupiah(totalBersih));
-        safeSet('fin-hero-total', formatRupiah(totalBersih));
-        window.rawTotalTagihan = totalBersih;
-
-        const docContainer = document.getElementById('dokumen-container');
-        if (docContainer) {
-            let docHtml = '';
-            
-            // Konfigurasi Status KK
-            const kkUploaded = userData.unggah_kk ? true : false;
-            const kkVerified = userData.verifikasi_kk;
-            const kkTheme = kkVerified ? 'bg-green-50 text-green-600' : (kkUploaded ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-500');
-            const kkIcon = kkVerified ? 'ph-check-circle' : (kkUploaded ? 'ph-clock' : 'ph-upload-simple');
-            const kkStatus = kkVerified ? 'Terverifikasi' : (kkUploaded ? 'Menunggu Verifikasi' : 'Belum Diunggah');
-            const kkTextColor = kkVerified ? 'text-green-600' : (kkUploaded ? 'text-yellow-600' : 'text-red-500');
-            
-            docHtml += `
-            <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between card-hover">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg ${kkTheme} flex items-center justify-center">
-                        <i class="ph-fill ${kkIcon} text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-semibold text-brand-navy">Kartu Keluarga (KK)</h4>
-                        <p class="text-[10px] ${kkTextColor} font-medium mt-0.5">${kkStatus}</p>
-                    </div>
-                </div>
-                <button class="text-brand-gold text-xs font-medium px-4 py-1.5 bg-brand-goldlight rounded-lg btn-press">
-                    ${kkUploaded ? 'Lihat' : 'Unggah'}
-                </button>
-            </div>`;
-
-            // Konfigurasi Status Akta
-            const aktaUploaded = userData.unggah_akta ? true : false;
-            const aktaVerified = userData.verifikasi_akta;
-            const aktaTheme = aktaVerified ? 'bg-green-50 text-green-600' : (aktaUploaded ? 'bg-yellow-50 text-yellow-600' : 'bg-red-50 text-red-500');
-            const aktaIcon = aktaVerified ? 'ph-check-circle' : (aktaUploaded ? 'ph-clock' : 'ph-upload-simple');
-            const aktaStatus = aktaVerified ? 'Terverifikasi' : (aktaUploaded ? 'Menunggu Verifikasi' : 'Belum Diunggah');
-            const aktaTextColor = aktaVerified ? 'text-green-600' : (aktaUploaded ? 'text-yellow-600' : 'text-red-500');
-
-            docHtml += `
-            <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between card-hover">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg ${aktaTheme} flex items-center justify-center">
-                        <i class="ph-fill ${aktaIcon} text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-semibold text-brand-navy">Akta Kelahiran</h4>
-                        <p class="text-[10px] ${aktaTextColor} font-medium mt-0.5">${aktaStatus}</p>
-                    </div>
-                </div>
-                <button class="text-brand-gold text-xs font-medium px-4 py-1.5 bg-brand-goldlight rounded-lg btn-press">
-                    ${aktaUploaded ? 'Lihat' : 'Unggah'}
-                </button>
-            </div>`;
-
-            docContainer.innerHTML = docHtml;
-        }
-
-        const riwayatSection = document.getElementById('fin-riwayat-section');
-        const statusIcon = document.getElementById('icon-status-transaksi');
-        const statusText = document.getElementById('teks-status-transaksi');
-        const kasirText = document.getElementById('teks-kasir');
-        const btnUnduh = document.getElementById('btn-unduh-struk');
-
-        if (riwayatSection && statusIcon && statusText) {
-            if (userData.bukti_transfer || userData.konfirmasi) {
-                riwayatSection.classList.remove('hidden');
-                
-                if (userData.konfirmasi) {
-                    statusIcon.className = "w-10 h-10 rounded-xl flex items-center justify-center bg-green-50 text-green-500 shrink-0";
-                    statusIcon.innerHTML = "<i class='ph-fill ph-check-circle text-2xl'></i>";
-                    statusText.className = "text-[10px] font-medium mt-0.5 text-green-600 flex items-center gap-1";
-                    statusText.innerHTML = "<i class='ph-fill ph-shield-check'></i> Pembayaran Berhasil";
-                    
-                    if (kasirText) {
-                        if (userData.kasir) {
-                            kasirText.classList.remove('hidden');
-                            kasirText.querySelector('span').innerText = userData.kasir;
-                        } else {
-                            kasirText.classList.add('hidden');
-                        }
-                    }
-                    if (btnUnduh) {
-                        btnUnduh.classList.remove('hidden');
-                        btnUnduh.onclick = () => unduhStruk(userData);
-                    }
-                } else {
-                    statusIcon.className = "w-10 h-10 rounded-xl flex items-center justify-center bg-yellow-50 text-yellow-500 shrink-0";
-                    statusIcon.innerHTML = "<i class='ph-fill ph-clock text-2xl'></i>";
-                    statusText.className = "text-[10px] font-medium mt-0.5 text-yellow-600 flex items-center gap-1";
-                    statusText.innerHTML = "Menunggu Verifikasi";
-                    
-                    if (kasirText) kasirText.classList.add('hidden');
-                    if (btnUnduh) btnUnduh.classList.add('hidden');
+    async function loadDataSistem() {
+        try {
+            // 1. Tarik Data Menu
+            fetch(`${SUPABASE_URL}menu_aplikasi?is_active=eq.true&order=urutan.asc`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            }).then(res => res.json()).then(data => {
+                if(data && !data.error) {
+                    dynamicMenus = data;
+                    renderDynamicMenu();
                 }
-            } else {
-                riwayatSection.classList.add('hidden');
-            }
+            }).catch(err => console.warn('Gagal load menu', err));
+
+            // 2. Tarik Data Pengumuman dan Timeline
+            fetch(`${SUPABASE_URL}pengumuman_sistem?is_active=eq.true&order=urutan.asc,tanggal.desc`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            }).then(res => res.json()).then(data => {
+                if(data && !data.error) {
+                    const pengumuman = data.filter(d => d.kategori === 'pengumuman');
+                    const timeline = data.filter(d => d.kategori === 'timeline');
+                    renderPengumuman(pengumuman);
+                    renderTimeline(timeline);
+                }
+            }).catch(err => console.warn('Gagal load pengumuman', err));
+            
+        } catch (error) {
+            console.warn("Gagal terhubung ke sistem menu");
         }
+    }
+
+    function renderPengumuman(data) {
+        const container = document.getElementById('pengumuman-container');
+        if(!container) return;
+        
+        if(data.length === 0) {
+            container.innerHTML = '<div class="text-xs text-brand-muted italic py-4 w-full text-center">Belum ada pengumuman terbaru.</div>';
+            return;
+        }
+
+        let html = '';
+        data.forEach(item => {
+            let badgeStyle = 'bg-blue-100 text-blue-700';
+            if (item.tipe_badge === 'PENTING') badgeStyle = 'bg-red-100 text-red-700';
+            else if (item.tipe_badge === 'UPDATE') badgeStyle = 'bg-brand-goldlight text-brand-gold';
+
+            // Merubah tanggal ke format yang lebih rapi (misal: 23 Sep 2026)
+            let tglFormat = '-';
+            try { tglFormat = new Date(item.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}); } catch(e){}
+
+            html += `
+            <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="${badgeStyle} text-[10px] font-bold px-2 py-1 rounded-md">${item.tipe_badge || 'INFO'}</span>
+                    <span class="text-[10px] text-brand-muted">${tglFormat}</span>
+                </div>
+                <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">${item.judul}</h4>
+                <p class="text-xs text-brand-muted line-clamp-2">${item.deskripsi || ''}</p>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function renderTimeline(data) {
+        const container = document.getElementById('timeline-container');
+        if(!container) return;
+        
+        if(data.length === 0) {
+            container.innerHTML = '<div class="text-xs text-brand-muted italic py-10 w-full text-center">Jalur timeline belum dikonfigurasi.</div>';
+            return;
+        }
+
+        let html = '';
+        data.forEach(item => {
+            let iconHtml = '';
+            let opacityClass = '';
+
+            if (item.status_timeline === 'selesai') {
+                iconHtml = `<div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center"><i class="ph-bold ph-check text-white text-[10px]"></i></div>`;
+            } else if (item.status_timeline === 'proses') {
+                iconHtml = `<div class="absolute -left-[13px] top-0 w-6 h-6 bg-brand-gold rounded-full border-4 border-white shadow-sm flex items-center justify-center animate-pulse"><div class="w-2 h-2 bg-white rounded-full"></div></div>`;
+            } else {
+                // Status Tunggu/Belum dimulai
+                iconHtml = `<div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>`;
+                opacityClass = 'opacity-50';
+            }
+
+            html += `
+            <div class="relative pl-6 ${opacityClass}">
+                ${iconHtml}
+                <h4 class="font-semibold text-brand-navy text-sm">${item.judul}</h4>
+                <p class="text-xs text-brand-muted mt-1">${item.deskripsi || ''}</p>
+            </div>`;
+        });
+        container.innerHTML = html;
     }
 
     function renderDynamicMenu() {
