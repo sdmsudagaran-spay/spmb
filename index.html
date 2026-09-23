@@ -435,6 +435,20 @@
                 </button>
             </div>
             <div class="flex-1 overflow-y-auto p-5 no-scrollbar pb-10">
+                
+                <!-- TAMBAHAN INFO RUANG ANALISIS -->
+                <div class="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100 mb-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                            <i class="ph-fill ph-door text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-brand-muted uppercase font-semibold">Ruang Analisis / Tes</p>
+                            <p id="hasil-ruang" class="text-sm font-semibold text-brand-navy mt-0.5">-</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 mb-6 relative">
                     <h3 class="font-heading font-semibold text-brand-navy text-sm mb-4 text-center">Grafik Kesiapan Belajar</h3>
                     <div class="relative w-full aspect-square max-h-[300px] mx-auto">
@@ -966,6 +980,7 @@
         safeSet('user-nopend-display', userData.no_ppdb || '-');
         safeSet('user-wave-display', "Gelombang Aktif");
         safeSet('dash-ruang', userData.ruang || 'Menunggu Jadwal');
+        safeSet('hasil-ruang', userData.ruang || 'Menunggu Jadwal');
         
         safeSet('prof-nama_murid', userData.nama_murid || '-');
         safeSet('prof-no_ppdb', userData.no_ppdb || '-');
