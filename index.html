@@ -779,6 +779,23 @@
 
                     <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
                         <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-50">
+                            <i class="ph-fill ph-backpack text-orange-500 text-xl"></i>
+                            <h4 class="font-heading font-semibold text-brand-navy text-sm">Administrasi & Perlengkapan</h4>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Pengambilan Perlengkapan</p>
+                                <div id="prof-perlengkapan" class="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500 transition-colors">Belum</div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <p class="text-[10px] text-brand-muted uppercase font-semibold">Status PA / PI</p>
+                                <div id="prof-papi" class="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500 transition-colors">Belum</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[20px] p-5 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-50">
                             <i class="ph-fill ph-lock-key text-gray-700 text-xl"></i>
                             <h4 class="font-heading font-semibold text-brand-navy text-sm">Keamanan Akun</h4>
                         </div>
@@ -1004,6 +1021,28 @@
         safeSet('prof-agama_ibu', userData.agama_ibu || '-');
         safeSet('prof-pend_ibu', userData.pend_ibu || '-');
         safeSet('prof-pekrj_ibu', userData.pekrj_ibu || '-');
+
+        const perlengkapanBadge = document.getElementById('prof-perlengkapan');
+        if(perlengkapanBadge) {
+            if(userData.perlengkapan) {
+                perlengkapanBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700";
+                perlengkapanBadge.innerHTML = "<i class='ph-bold ph-check mr-1'></i>Sudah Diambil";
+            } else {
+                perlengkapanBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-yellow-100 text-yellow-700";
+                perlengkapanBadge.innerHTML = "<i class='ph-bold ph-clock mr-1'></i>Belum Diambil";
+            }
+        }
+
+        const papiBadge = document.getElementById('prof-papi');
+        if(papiBadge) {
+            if(userData.pa_pi) {
+                papiBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700";
+                papiBadge.innerHTML = "<i class='ph-bold ph-check mr-1'></i>Selesai";
+            } else {
+                papiBadge.className = "text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500";
+                papiBadge.innerHTML = "<i class='ph-bold ph-minus mr-1'></i>Belum Selesai";
+            }
+        }
 
         const pendaftaran = parseFloat(userData.pendaftaran || 0);
         const daftarUlang = parseFloat(userData.daftar_ulang || 0);
