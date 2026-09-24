@@ -246,11 +246,11 @@
             <div class="bg-white rounded-[24px] p-5 shadow-premium mb-6 border border-gray-100 card-hover">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-heading font-semibold text-brand-navy text-sm">Progress SPMB</h3>
-                    <span class="text-brand-gold font-bold text-xl font-heading">82%</span>
+                    <span id="dash-progress-text" class="text-brand-gold font-bold text-xl font-heading">0%</span>
                 </div>
                 
                 <div class="w-full h-3 bg-brand-bg rounded-full overflow-hidden mb-4">
-                    <div class="h-full bg-gradient-to-r from-brand-navy to-brand-gold rounded-full progress-animate" style="--target-width: 82%;"></div>
+                    <div id="dash-progress-bar" class="h-full bg-gradient-to-r from-brand-navy to-brand-gold rounded-full progress-animate" style="--target-width: 0%;"></div>
                 </div>
 
                 <div class="bg-brand-bg rounded-xl p-3 flex items-center gap-3">
@@ -259,7 +259,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-brand-muted">Status Saat Ini:</p>
-                        <p class="text-sm font-semibold text-brand-navy leading-tight">Menunggu Verifikasi Berkas</p>
+                        <p id="dash-status-text" class="text-sm font-semibold text-brand-navy leading-tight">Menunggu Verifikasi Berkas</p>
                     </div>
                 </div>
 
@@ -952,6 +952,19 @@
         const elHasilRuang = document.getElementById('hasil-ruang');
         if(elHasilRuang) elHasilRuang.innerText = user.ruang || 'Menunggu Jadwal';
 
+        // UPDATE PROGRES BAR DARI DATABASE
+        const progressValue = user.progress || 0;
+        const progressStatus = user.tahap || 'Pendaftaran Diproses';
+        
+        const elProgText = document.getElementById('dash-progress-text');
+        if (elProgText) elProgText.innerText = progressValue + '%';
+        
+        const elProgBar = document.getElementById('dash-progress-bar');
+        if (elProgBar) elProgBar.style.setProperty('--target-width', progressValue + '%');
+        
+        const elStatusText = document.getElementById('dash-status-text');
+        if (elStatusText) elStatusText.innerText = progressStatus;
+
         // 2. Profil Siswa
         const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val || '-'; };
         
@@ -1338,11 +1351,27 @@
         // Render Timeline (tl_1 sampai tl_4 dari pengaturan_sistem dikombinasikan dengan t1 s/d t4 dari progres siswa)
         const containerTimeline = document.getElementById('timeline-container');
         if(containerTimeline && currentUser) {
+            
+            // Logika kaskade: Menentukan status berdasarkan urutan penyelesaian
+            let s1 = 'tunggu', s2 = 'tunggu', s3 = 'tunggu', s4 = 'tunggu';
+            
+            if (currentUser.t4 === true) { 
+                s1 = 'selesai'; s2 = 'selesai'; s3 = 'selesai'; s4 = 'selesai'; 
+            } else if (currentUser.t3 === true) { 
+                s1 = 'selesai'; s2 = 'selesai'; s3 = 'selesai'; s4 = 'proses'; 
+            } else if (currentUser.t2 === true) { 
+                s1 = 'selesai'; s2 = 'selesai'; s3 = 'proses'; s4 = 'tunggu'; 
+            } else if (currentUser.t1 === true) { 
+                s1 = 'selesai'; s2 = 'proses'; s3 = 'tunggu'; s4 = 'tunggu'; 
+            } else { 
+                s1 = 'proses'; // Jika belum ada yang dicentang, maka tahap 1 sedang dalam proses
+            }
+
             const tl = [
-                { judul: setting.tl_1, status: currentUser.t1 ? 'selesai' : 'tunggu' },
-                { judul: setting.tl_2, status: currentUser.t2 ? 'selesai' : 'tunggu' },
-                { judul: setting.tl_3, status: currentUser.t3 ? 'selesai' : 'tunggu' },
-                { judul: setting.tl_4, status: currentUser.t4 ? 'selesai' : 'tunggu' }
+                { judul: setting.tl_1, status: s1 },
+                { judul: setting.tl_2, status: s2 },
+                { judul: setting.tl_3, status: s3 },
+                { judul: setting.tl_4, status: s4 }
             ];
             
             let html = '';
@@ -1352,8 +1381,8 @@
 
                 if (item.status === 'selesai') {
                     iconHtml = `<div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center"><i class="ph-bold ph-check text-white text-[10px]"></i></div>`;
-                } else if (item.status === 'proses' || (index > 0 && tl[index-1].status === 'selesai' && item.status !== 'selesai')) {
-                     // Logika otomatis: jika tahap sebelumnya selesai, tahap ini 'proses' (berkedip)
+                } else if (item.status === 'proses') {
+                     // Status saat ini berjalan (berkedip)
                      iconHtml = `<div class="absolute -left-[13px] top-0 w-6 h-6 bg-brand-gold rounded-full border-4 border-white shadow-sm flex items-center justify-center animate-pulse"><div class="w-2 h-2 bg-white rounded-full"></div></div>`;
                 } else {
                     iconHtml = `<div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>`;
