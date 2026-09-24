@@ -845,38 +845,14 @@
                     <p class="text-xs text-brand-muted mt-2 leading-relaxed">Pantau status pengambilan seragam, buku, dan pemenuhan administrasi kelengkapan ananda di sini.</p>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex flex-col gap-3">
-                        <div class="flex items-center gap-3 mb-1">
-                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                                <i class="ph-fill ph-t-shirt text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-brand-navy">Pengambilan Perlengkapan</h4>
-                                <p class="text-[10px] text-brand-muted mt-0.5">Seragam, Buku, dll.</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center border-t border-gray-50 pt-3">
-                            <span class="text-xs font-medium text-brand-navy">Status Saat Ini:</span>
-                            <div id="status-perlengkapan-baru" class="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500">Memuat...</div>
-                        </div>
-                    </div>
+                <div class="mb-2 flex justify-between items-center px-1">
+                    <h3 class="font-heading font-semibold text-brand-navy text-sm">Daftar Item</h3>
+                    <span class="text-[10px] text-brand-muted italic">Otomatis dari sistem</span>
+                </div>
 
-                    <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex flex-col gap-3">
-                        <div class="flex items-center gap-3 mb-1">
-                            <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
-                                <i class="ph-fill ph-user-list text-xl"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-semibold text-brand-navy">Status Administrasi PA / PI</h4>
-                                <p class="text-[10px] text-brand-muted mt-0.5">Pendataan wali & siswa</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center border-t border-gray-50 pt-3">
-                            <span class="text-xs font-medium text-brand-navy">Status Saat Ini:</span>
-                            <div id="status-papi-baru" class="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500">Memuat...</div>
-                        </div>
-                    </div>
+                <!-- Kontainer Daftar Perlengkapan Dinamis -->
+                <div id="list-perlengkapan-container" class="space-y-3">
+                    <div class="text-center text-xs text-brand-muted mt-8">Memuat daftar perlengkapan...</div>
                 </div>
             </div>
         </div>
@@ -985,27 +961,52 @@
         safeSet('prof-pend_ibu', user.pend_ibu);
         safeSet('prof-pekrj_ibu', user.pekrj_ibu);
 
-        // 3. Administrasi & Perlengkapan (Diambil dari tabel perlengkapan)
-        const elPerlengkapan = document.getElementById('status-perlengkapan-baru');
-        if (elPerlengkapan) {
-            if (user.ambil_souvenir === true) {
-                elPerlengkapan.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700';
-                elPerlengkapan.innerText = 'Sudah Diambil';
-            } else {
-                elPerlengkapan.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-yellow-100 text-yellow-700';
-                elPerlengkapan.innerText = 'Belum Diambil';
-            }
-        }
-        
-        const elPaPi = document.getElementById('status-papi-baru');
-        if (elPaPi) {
-            if (user.s1 === true) {
-                elPaPi.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700';
-                elPaPi.innerText = 'Lengkap';
-            } else {
-                elPaPi.className = 'text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-500';
-                elPaPi.innerText = 'Belum Diproses';
-            }
+        // 3. Administrasi & Perlengkapan (Daftar Dinamis dari tabel perlengkapan)
+        // Pemetaan nama barang dengan kolom di tabel (s1 s/d s13)
+        const perlengkapanItems = [
+            { key: 'ambil_souvenir', label: 'Souvenir Pendaftaran', icon: 'ph-gift' },
+            { key: 's1', label: 'Administrasi PA / PI', icon: 'ph-users' },
+            { key: 's2', label: 'Seragam Nasional (Merah Putih)', icon: 'ph-t-shirt' },
+            { key: 's3', label: 'Seragam Pramuka / HW', icon: 'ph-t-shirt' },
+            { key: 's4', label: 'Seragam Tapak Suci', icon: 'ph-t-shirt' },
+            { key: 's5', label: 'Seragam Olahraga', icon: 'ph-sneaker' },
+            { key: 's6', label: 'Seragam Batik', icon: 'ph-t-shirt' },
+            { key: 's7', label: 'Buku Paket / Tematik', icon: 'ph-books' },
+            { key: 's8', label: 'Buku Tulis & Alat Tulis', icon: 'ph-notebook' },
+            { key: 's9', label: 'Atribut (Topi, Dasi, Sabuk)', icon: 'ph-baseball-cap' },
+            { key: 's10', label: 'Jilbab / Peci', icon: 'ph-user' },
+            { key: 's11', label: 'Kartu Pelajar (Sementara)', icon: 'ph-identification-card' },
+            { key: 's12', label: 'Buku Penghubung', icon: 'ph-book-open' },
+            { key: 's13', label: 'LKS / Modul Tambahan', icon: 'ph-files' }
+        ];
+
+        const containerPerlengkapan = document.getElementById('list-perlengkapan-container');
+        if (containerPerlengkapan) {
+            let htmlList = '';
+            perlengkapanItems.forEach(item => {
+                const isTaken = user[item.key] === true; // Mengecek apakah di database bernilai true
+                
+                // Menentukan warna dan ikon berdasarkan status
+                const bgClass = isTaken ? 'bg-green-50 border-green-100' : 'bg-white border-gray-100';
+                const iconColor = isTaken ? 'text-green-500' : 'text-brand-navy opacity-50';
+                const statusBg = isTaken ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200';
+                const statusText = isTaken ? '<i class="ph-bold ph-check"></i> Sudah' : 'Belum';
+
+                htmlList += `
+                    <div class="${bgClass} p-3 rounded-[16px] shadow-sm border flex items-center justify-between transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0 ${iconColor} border border-gray-50">
+                                <i class="ph-fill ${item.icon} text-xl"></i>
+                            </div>
+                            <h4 class="text-xs font-semibold text-brand-navy">${item.label}</h4>
+                        </div>
+                        <div class="text-[10px] font-bold px-2 py-1 rounded-md ${statusBg} flex items-center gap-1 shrink-0">
+                            ${statusText}
+                        </div>
+                    </div>
+                `;
+            });
+            containerPerlengkapan.innerHTML = htmlList;
         }
 
         // 4. Keuangan (Menyesuaikan dengan BIGINT di Supabase)
