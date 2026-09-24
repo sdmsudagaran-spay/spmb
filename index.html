@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -541,7 +542,7 @@
                     
                     <div class="flex items-center justify-between text-sm border-t border-white/10 pt-3">
                         <span class="text-white/70">Status Pembayaran</span>
-                        <span class="bg-red-500/20 text-red-300 text-[10px] px-2 py-1 rounded-md border border-red-500/30">Belum Lunas</span>
+                        <span id="fin-status-badge" class="bg-red-500/20 text-red-300 text-[10px] px-2 py-1 rounded-md border border-red-500/30">Belum Lunas</span>
                     </div>
                 </div>
 
@@ -681,7 +682,7 @@
                                     <p id="teks-kasir" class="text-[10px] text-brand-muted mt-0.5 hidden">Dikonfirmasi oleh: <span class="font-semibold text-brand-navy"></span></p>
                                 </div>
                             </div>
-                            <button id="btn-unduh-struk" class="hidden bg-brand-gold hover:bg-yellow-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium btn-press flex items-center gap-1 transition-colors">
+                            <button id="btn-unduh-struk" onclick="unduhStruk(currentUser)" class="hidden bg-brand-gold hover:bg-yellow-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium btn-press flex items-center gap-1 transition-colors">
                                 <i class="ph-bold ph-printer"></i> Struk
                             </button>
                         </div>
@@ -1021,13 +1022,23 @@
         const earlyBird = parseInt(user.early_bird) || 0;
         const kaderAum = parseInt(user.kader_aum) || 0;
 
-        // Aturan Khusus: Tampilkan '-' jika pendaftaran 0, dan '=' jika BOPD 0
-        safeSet('fin-pendaftaran', pendaftaran === 0 ? '-' : formatRupiah(pendaftaran));
+        // Pendaftaran - Centang Hijau / Silang Merah
+        const elPend = document.getElementById('fin-pendaftaran');
+        if (elPend) {
+            if (pendaftaran > 0) { // Berarti sudah mendaftar & bayar
+                elPend.innerHTML = `<div class="w-5 h-5 bg-green-100 border border-green-300 rounded-full flex items-center justify-center shadow-sm"><i class="ph-bold ph-check text-green-600 text-[10px]"></i></div>`;
+            } else { // Belum mendaftar / data pendaftaran 0
+                elPend.innerHTML = `<div class="w-5 h-5 bg-red-100 border border-red-300 rounded-full flex items-center justify-center shadow-sm"><i class="ph-bold ph-x text-red-600 text-[10px]"></i></div>`;
+            }
+        }
+
+        // Aturan Khusus: Tampilkan '=' jika BOPD 0
         safeSet('fin-daftar_ulang', formatRupiah(daftarUlang));
         safeSet('fin-bopd', bopd === 0 ? '=' : formatRupiah(bopd));
 
         let totalDiskon = earlyBird + kaderAum;
-        let totalTagihan = (pendaftaran + daftarUlang + bopd) - totalDiskon;
+        // Pendaftaran tidak lagi ditambahkan ke total tagihan karena menggunakan simbol status
+        let totalTagihan = (daftarUlang + bopd) - totalDiskon;
         window.rawTotalTagihan = totalTagihan.toString(); // untuk fitur copy
 
         safeSet('fin-total', formatRupiah(totalTagihan));
@@ -1049,53 +1060,60 @@
             }
         }
 
-        // Hapus Simulasi Angsuran Sementara, karena kolom bopd1, bopd2 tidak ada di skema baru.
-        const angsSection = document.getElementById('fin-angsuran-section');
-        if (angsSection) angsSection.classList.add('hidden');
-
-        // 5. Riwayat Transaksi (Konfirmasi dari tabel keuangan)
+        // 4.5. Logika Tampilan Riwayat Transaksi & Tombol Cetak Struk
         const riwayatSection = document.getElementById('fin-riwayat-section');
         const iconStatus = document.getElementById('icon-status-transaksi');
         const textStatus = document.getElementById('teks-status-transaksi');
-        const textKasir = document.getElementById('teks-kasir');
+        const teksKasir = document.getElementById('teks-kasir');
         const btnUnduh = document.getElementById('btn-unduh-struk');
-        const btnLanjutBayar = document.getElementById('btn-lanjut-bayar');
+        const statusBadge = document.getElementById('fin-status-badge');
         
-        if (riwayatSection && iconStatus && textStatus && textKasir && btnUnduh) {
-            if (user.bukti_transfer || user.konfirmasi) {
+        if (riwayatSection && iconStatus && textStatus && btnUnduh) {
+            if (user.konfirmasi === true) {
+                // Pembayaran Lunas & Dikonfirmasi Admin
                 riwayatSection.classList.remove('hidden');
-                if(btnLanjutBayar) btnLanjutBayar.classList.add('hidden');
+                iconStatus.className = 'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-green-100 text-green-600';
+                iconStatus.innerHTML = '<i class="ph-fill ph-check-circle text-2xl"></i>';
+                textStatus.className = 'text-[10px] font-bold text-green-600 mt-0.5';
+                textStatus.innerText = 'LUNAS & DIKONFIRMASI';
+                btnUnduh.classList.remove('hidden'); 
                 
-                if (user.konfirmasi) {
-                    iconStatus.className = "w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center shrink-0 text-green-600";
-                    iconStatus.innerHTML = '<i class="ph-fill ph-check-circle text-2xl"></i>';
-                    textStatus.innerText = "Berhasil & Dikonfirmasi";
-                    textStatus.className = "text-[10px] font-bold text-green-600 mt-0.5";
-                    
-                    textKasir.classList.remove('hidden');
-                    const spanKasir = textKasir.querySelector('span');
-                    if(spanKasir) spanKasir.innerText = user.kasir || 'Admin';
-                    
-                    btnUnduh.classList.remove('hidden');
-                    btnUnduh.onclick = () => unduhStruk(user);
-                } else {
-                    iconStatus.className = "w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center shrink-0 text-yellow-600";
-                    iconStatus.innerHTML = '<i class="ph-fill ph-clock text-2xl"></i>';
-                    textStatus.innerText = "Menunggu Verifikasi Admin";
-                    textStatus.className = "text-[10px] font-bold text-yellow-600 mt-0.5";
-                    
-                    textKasir.classList.add('hidden');
-                    btnUnduh.classList.add('hidden');
+                if(statusBadge) {
+                    statusBadge.className = 'bg-green-500/20 text-green-300 text-[10px] px-2 py-1 rounded-md border border-green-500/30';
+                    statusBadge.innerText = 'Lunas';
+                }
+                
+                if(user.kasir && teksKasir) {
+                    teksKasir.classList.remove('hidden');
+                    teksKasir.querySelector('span').innerText = user.kasir;
+                }
+            } else if (user.bukti_transfer) {
+                // Sudah Upload Bukti Transfer Tapi Belum Dikonfirmasi Admin
+                riwayatSection.classList.remove('hidden');
+                iconStatus.className = 'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-yellow-100 text-yellow-600';
+                iconStatus.innerHTML = '<i class="ph-fill ph-clock text-2xl"></i>';
+                textStatus.className = 'text-[10px] font-bold text-yellow-600 mt-0.5';
+                textStatus.innerText = 'MENUNGGU VERIFIKASI';
+                btnUnduh.classList.add('hidden'); 
+                if(teksKasir) teksKasir.classList.add('hidden');
+                
+                if(statusBadge) {
+                    statusBadge.className = 'bg-yellow-500/20 text-yellow-300 text-[10px] px-2 py-1 rounded-md border border-yellow-500/30';
+                    statusBadge.innerText = 'Menunggu Verifikasi';
                 }
             } else {
+                // Belum Membayar
                 riwayatSection.classList.add('hidden');
-                if(btnLanjutBayar) btnLanjutBayar.classList.remove('hidden');
+                if(statusBadge) {
+                    statusBadge.className = 'bg-red-500/20 text-red-300 text-[10px] px-2 py-1 rounded-md border border-red-500/30';
+                    statusBadge.innerText = 'Belum Lunas';
+                }
             }
         }
 
-        // 6. Dokumen 
+        // 5. Dokumen
         const dokContainer = document.getElementById('dokumen-container');
-        if(dokContainer) {
+        if (dokContainer) {
             let htmlDok = '';
             
             // Logika KK
@@ -1221,6 +1239,16 @@
                             
                             // Gabungkan semua data menjadi satu object currentUser
                             currentUser = { ...userData, ...keuData, ...analData, ...perData };
+                            
+                            // KUNCI BIODATA: Memastikan biodata mutlak membaca dari tabel 'pendaftar' (userData) 
+                            // agar tidak tertimpa oleh tabel lain yang mungkin nilainya kosong/null
+                            const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
+                            bioKeys.forEach(k => { 
+                                if(userData[k] !== undefined && userData[k] !== null) {
+                                    currentUser[k] = userData[k]; 
+                                }
+                            });
+                            
                             break; 
                         }
                     }
@@ -1769,11 +1797,17 @@
                     let perData = {};
                     try { const res = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) perData = d[0]; } } catch(e) {}
                     
+                    // Gabungkan semua data
                     currentUser = { ...userData, ...keuData, ...analData, ...perData };
-                    updateDashboardUI(currentUser);
-                    alertCustom("Data berhasil diperbarui dari server!");
-                    // Gabungkan semua data persis seperti saat Login, sehingga data keuangan terupdate sempurna
-                    currentUser = { ...userData, ...keuData, ...analData, ...perData };
+                    
+                    // KUNCI BIODATA: Memastikan biodata mutlak membaca dari tabel 'pendaftar' (userData)
+                    const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
+                    bioKeys.forEach(k => { 
+                        if(userData[k] !== undefined && userData[k] !== null) {
+                            currentUser[k] = userData[k]; 
+                        }
+                    });
+
                     updateDashboardUI(currentUser);
                     alertCustom("Data berhasil diperbarui!");
                 }
@@ -1786,60 +1820,108 @@
     }
 
     function unduhStruk(userData) {
-        try {
-            const printWindow = window.open('', '_blank');
-            if (!printWindow) {
-                alertCustom("Browser memblokir jendela baru. Harap izinkan pop-up.");
-                return;
-            }
+        const btnUnduh = document.getElementById('btn-unduh-struk');
+        if(!btnUnduh) return;
+        
+        const originalHtml = btnUnduh.innerHTML;
+        btnUnduh.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Proses...';
+        btnUnduh.disabled = true;
 
-            const tglCetak = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
-            const html = `
-                <html>
-                <head>
-                    <title>Struk Pembayaran - ${userData.nama_murid || 'Siswa'}</title>
-                    <style>
-                        body { font-family: 'Courier New', Courier, monospace; padding: 20px; max-width: 400px; margin: 0 auto; color: #111; }
-                        .header { text-align: center; border-bottom: 2px dashed #333; padding-bottom: 15px; margin-bottom: 20px; }
-                        .header h3 { margin: 0 0 5px 0; font-size: 18px; }
-                        .header p { margin: 0; font-size: 12px; }
-                        .row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
-                        .total { font-weight: bold; font-size: 15px; border-top: 1px dashed #333; border-bottom: 1px dashed #333; padding: 10px 0; margin: 15px 0; }
-                        .footer { text-align: center; margin-top: 30px; font-size: 11px; color: #555; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h3>SD MUHAMMADIYAH SUDAGARAN</h3>
-                        <p>BUKTI PEMBAYARAN PMB SAH</p>
-                    </div>
-                    <div class="row"><span>Tanggal Cetak:</span> <span>${tglCetak}</span></div>
-                    <div class="row"><span>Nomor PPDB:</span> <span>${userData.no_ppdb || '-'}</span></div>
-                    <div class="row"><span>Nama Siswa:</span> <span>${userData.nama_murid || '-'}</span></div>
-                    <div class="row"><span>Dikonfirmasi Oleh:</span> <span>${userData.kasir || 'Admin/Kasir'}</span></div>
-                    
-                    <div class="row total">
-                        <span>STATUS PEMBAYARAN:</span>
-                        <span>LUNAS</span>
-                    </div>
-                    
-                    <div class="footer">
-                        <p>Terima kasih.<br>Simpan struk ini sebagai bukti pembayaran yang sah saat melakukan pendaftaran ulang di sekolah.</p>
-                    </div>
-                </body>
-                </html>
-            `;
-            printWindow.document.write(html);
-            printWindow.document.close();
+        // Mempersiapkan data hitungan untuk struk
+        const tglCetak = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+        let daftarUlang = parseInt(userData.daftar_ulang) || ((userData.jk === 'P' || userData.jk === 'p') ? 3850000 : 3780000);
+        let bopd = parseInt(userData.bopd) || 0;
+        let earlyBird = parseInt(userData.early_bird) || 0;
+        let kaderAum = parseInt(userData.kader_aum) || 0;
+        let totalDiskon = earlyBird + kaderAum;
+        let totalTagihan = (daftarUlang + bopd) - totalDiskon;
+
+        // 1. Membuat Elemen Struk Virtual (Ukuran Standar Mesin Kasir 80mm / ~300px)
+        const strukDiv = document.createElement('div');
+        strukDiv.style.position = 'absolute';
+        strukDiv.style.left = '-9999px';
+        strukDiv.style.top = '0';
+        strukDiv.style.width = '300px'; 
+        strukDiv.style.backgroundColor = '#ffffff';
+        strukDiv.style.color = '#000000';
+        strukDiv.style.fontFamily = "'Courier New', Courier, monospace";
+        strukDiv.style.padding = '20px';
+        strukDiv.style.boxSizing = 'border-box';
+
+        // 2. Merakit Desain Struk
+        strukDiv.innerHTML = `
+            <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 15px;">
+                <img src="https://iili.io/nuUTLcN.md.png" style="width: 50px; height: 50px; margin-bottom: 8px; filter: grayscale(100%);">
+                <h3 style="margin: 0; font-size: 15px; font-weight: bold;">SD MUH SUDAGARAN</h3>
+                <p style="margin: 3px 0 0 0; font-size: 11px;">Struk Pembayaran PMB Valid</p>
+            </div>
             
-            /* Menambahkan script print secara terpisah agar tidak merusak parser HTML utama */
-            const script = printWindow.document.createElement('script');
-            script.innerHTML = "window.onload = function() { window.print(); }";
-            printWindow.document.body.appendChild(script);
+            <div style="font-size: 11px; line-height: 1.6; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between;"><span>Tgl Cetak:</span> <span>${tglCetak}</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>No. PPDB:</span> <span>${userData.no_ppdb || '-'}</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Nama:</span> <span style="text-align: right; font-weight: bold; max-width: 150px;">${userData.nama_murid || '-'}</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Kasir:</span> <span>${userData.kasir || 'Admin'}</span></div>
+            </div>
             
-        } catch (error) {
-            alertCustom("Gagal memuat sistem cetak.");
+            <div style="font-size: 11px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 10px 0; margin-bottom: 15px;">
+                <div style="text-align: center; margin-bottom: 8px; font-weight: bold;">RINCIAN TRANSAKSI</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Pendaftaran</span> <span>LUNAS KASIR</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Daftar Ulang</span> <span>${formatRupiah(daftarUlang)}</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Biaya BOPD</span> <span>${formatRupiah(bopd)}</span></div>
+                ${earlyBird > 0 ? `<div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Pot. Early Bird</span> <span>-${formatRupiah(earlyBird)}</span></div>` : ''}
+                ${kaderAum > 0 ? `<div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Pot. Kader AUM</span> <span>-${formatRupiah(kaderAum)}</span></div>` : ''}
+            </div>
+            
+            <div style="font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <span>TOTAL:</span>
+                <span>${formatRupiah(totalTagihan)}</span>
+            </div>
+            
+            <div style="text-align: center; border: 2px solid #000; padding: 6px; font-weight: bold; font-size: 13px; margin-bottom: 20px;">
+                STATUS: LUNAS
+            </div>
+            
+            <div style="text-align: center; font-size: 10px; color: #444; line-height: 1.4;">
+                Terima kasih.<br>Simpan struk digital ini sebagai bukti pendaftaran ulang.
+            </div>
+        `;
+        
+        document.body.appendChild(strukDiv);
+
+        // 3. Render ke PNG Menggunakan html2canvas
+        if (typeof html2canvas === 'undefined') {
+            alertCustom("Sistem struk sedang dimuat, coba lagi sebentar.");
+            document.body.removeChild(strukDiv);
+            btnUnduh.innerHTML = originalHtml;
+            btnUnduh.disabled = false;
+            return;
         }
+
+        html2canvas(strukDiv, {
+            scale: 2, // Kualitas HD
+            backgroundColor: "#ffffff",
+            logging: false,
+            useCORS: true // Mengizinkan logo eksternal
+        }).then(canvas => {
+            const imgData = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            
+            // Nama File Unik Berdasarkan Nama Murid
+            const safeName = (userData.nama_murid || 'Siswa').replace(/[^a-zA-Z0-9]/g, '_');
+            link.download = `STRUK_PMB_${safeName}.png`;
+            link.href = imgData;
+            link.click(); // Eksekusi Download
+            
+            document.body.removeChild(strukDiv);
+            btnUnduh.innerHTML = originalHtml;
+            btnUnduh.disabled = false;
+            alertCustom("Struk berhasil disimpan ke galeri (PNG)!");
+        }).catch(err => {
+            document.body.removeChild(strukDiv);
+            btnUnduh.innerHTML = originalHtml;
+            btnUnduh.disabled = false;
+            alertCustom("Gagal membuat struk bergambar.");
+        });
     }
 
     // FUNGSI LOGOUT (KELUAR APLIKASI)
