@@ -1537,13 +1537,29 @@
         const ket_ma = currentUser?.ket_melafalkan_surat_pendek_doa_harian || fallback;
         const ket_inv = currentUser?.ket_interview || fallback;
 
+        // Fungsi pembuat warna dinamis berdasarkan skor
+        const getDynamicColor = (val) => {
+            if (val >= 90) return { hex: '#3B82F6', twBg: 'bg-blue-500', twText: 'text-blue-500' }; // Biru
+            if (val >= 60) return { hex: '#22C55E', twBg: 'bg-green-500', twText: 'text-green-500' }; // Hijau
+            if (val >= 41) return { hex: '#F59E0B', twBg: 'bg-yellow-500', twText: 'text-yellow-500' }; // Kuning
+            return { hex: '#EF4444', twBg: 'bg-red-500', twText: 'text-red-500' }; // Merah (0 - 40)
+        };
+
         const updateBar = (suffix, val, ketText) => {
             const valEl = document.getElementById(`skor-${suffix}`);
             const barEl = document.getElementById(`bar-${suffix}`);
             const ketEl = document.getElementById(`ket-${suffix}`);
             
-            if (valEl) valEl.innerText = val;
-            if (barEl) barEl.style.width = `${val}%`;
+            const warna = getDynamicColor(val);
+            
+            if (valEl) {
+                valEl.innerText = val;
+                valEl.className = `font-bold ${warna.twText}`; // Mengubah warna angka
+            }
+            if (barEl) {
+                barEl.style.width = `${val}%`;
+                barEl.className = `h-2 rounded-full transition-all duration-1000 ${warna.twBg}`; // Mengubah warna bar
+            }
             if (ketEl) ketEl.innerText = ketText;
         };
         
@@ -1556,15 +1572,26 @@
             updateBar('interview', inv, ket_inv);
         }, 100);
 
+        // Menyiapkan susunan warna untuk setiap titik-titik (dots) di grafik radar
+        const dataScores = [mh, mb, mm, mn, ma, inv];
+        const pointColorsHex = dataScores.map(score => getDynamicColor(score).hex);
+
         chartInstance = new Chart(ctx, {
             type: 'radar',
             data: {
                 labels: ['Mengenal Huruf', 'Mengenal Bilangan', 'Menggunting & Menempel', 'Menyanyi Lagu Nasional', 'Melafalkan Surat & Doa', 'Interview'],
                 datasets: [{
-                    label: 'Skor Siswa', data: [mh, mb, mm, mn, ma, inv],
-                    backgroundColor: 'rgba(217, 164, 65, 0.2)', borderColor: '#D9A441',
-                    pointBackgroundColor: '#0F2747', pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#0F2747', borderWidth: 2,
+                    label: 'Skor Siswa', 
+                    data: dataScores,
+                    backgroundColor: 'rgba(217, 164, 65, 0.15)', // Latar dalam sedikit transparan
+                    borderColor: '#D9A441', // Garis pinggir emas
+                    pointBackgroundColor: pointColorsHex, // Titik-titik warna-warni dinamis!
+                    pointBorderColor: '#fff', // Border titik putih
+                    pointHoverBackgroundColor: '#fff', 
+                    pointHoverBorderColor: pointColorsHex,
+                    borderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
                 }]
             },
             options: {
@@ -1578,7 +1605,14 @@
                         ticks: { 
                             display: false,
                             stepSize: 10 
-                        } 
+                        },
+                        pointLabels: {
+                            font: { size: 9, family: "'Inter', sans-serif" },
+                            color: '#64748B'
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
                     } 
                 },
                 plugins: { legend: { display: false } }
