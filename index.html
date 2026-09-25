@@ -1047,7 +1047,7 @@
 
         // HITUNG TOTAL TAGIHAN AKTIF (Keseluruhan sisa tagihan yang belum lunas)
         let totalTagihanAktif = 0;
-        if (!(user.konf_pendaftaran === true || pendaftaran > 0)) totalTagihanAktif += 300000;
+        if (!(user.konf_pendaftaran === true)) totalTagihanAktif += 300000;
         if (!(user.konf_daftar_ulang === true) && daftarUlang > 0) totalTagihanAktif += daftarUlang;
         if (bopd > 0) {
             if (!(user.konf_bopd1 === true)) totalTagihanAktif += Math.max(0, window.tagihanData.bopd1 - window.tagihanData.totalDiskon);
@@ -1065,17 +1065,17 @@
             let htmlTagihan = '';
             
             // ---------------- PENDAFTARAN ----------------
-            if (pendaftaran > 0) {
-                htmlTagihan += `
-                <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg">
-                    <span class="text-brand-muted font-medium ml-1">Pendaftaran</span>
-                    <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas di Kasir</span>
-                </div>`;
-            } else if (user.konf_pendaftaran === true) { 
+            if (user.konf_pendaftaran === true) { 
                 htmlTagihan += `
                 <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg">
                     <span class="text-brand-muted font-medium ml-1">Pendaftaran</span>
                     <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span>
+                </div>`;
+            } else if (pendaftaran > 0 && !user.bukti_tf_pendaftaran) {
+                htmlTagihan += `
+                <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg">
+                    <span class="text-brand-muted font-medium ml-1">Pendaftaran</span>
+                    <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas di Kasir</span>
                 </div>`;
             } else if (user.bukti_tf_pendaftaran) {
                 htmlTagihan += `
@@ -1208,7 +1208,9 @@
         hitungUlangTagihan();
 
         // 4.5. Logika Tampilan Riwayat Transaksi per Item
-        let statusPendLunas = (user.konf_pendaftaran === true || pendaftaran > 0);
+        // KUNCI KEAMANAN STRUK: Struk masing-masing item akan muncul secara independen JIKA statusnya LUNAS.
+        // Khusus Pendaftaran, jika nominal > 0 dan tidak ada bukti TF, itu artinya bayar tunai (Lunas di Kasir) dan BERHAK dapat struk.
+        let statusPendLunas = (user.konf_pendaftaran === true) || (pendaftaran > 0 && !user.bukti_tf_pendaftaran);
         let statusDaftarLunas = (user.konf_daftar_ulang === true);
         let statusBopd1Lunas = (user.konf_bopd1 === true);
         let statusBopd2Lunas = (user.konf_bopd2 === true);
