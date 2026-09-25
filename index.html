@@ -1525,27 +1525,25 @@
     }
 
     function renderPengumumanSistem(dataAll) {
-        const dTimelines = dataAll.filter(d => d.kategori === 'timeline');
-        const dPengumumans = dataAll.filter(d => d.kategori === 'pengumuman');
-
+        // TIMELINE: Sepenuhnya mengambil status (t1-t4) dari tabel pendaftar
         const containerTimeline = document.getElementById('timeline-container');
         if(containerTimeline && currentUser) {
-            let s1 = 'tunggu', s2 = 'tunggu', s3 = 'tunggu', s4 = 'tunggu';
+            let s1 = 'tunggu', s2 = 'tunggu', s3 = 'tunggu', s4 = 'tunggu', s5 = 'tunggu';
             let progressValue = 0;
             let currentStatus = 'Menunggu Mulai';
             let nextStep = 'Pendaftaran';
             
             if (currentUser.t4 === true) { 
-                s1 = 'selesai'; s2 = 'selesai'; s3 = 'selesai'; s4 = 'selesai'; 
-                progressValue = 100; currentStatus = 'Tes Kesiapan & Lulus'; nextStep = 'Tuntas (Selesai)';
+                s1 = 'selesai'; s2 = 'selesai'; s3 = 'selesai'; s4 = 'selesai'; s5 = 'selesai';
+                progressValue = 100; currentStatus = 'Tuntas (Selesai)'; nextStep = 'Siap Masuk Sekolah';
             } else if (currentUser.t3 === true) { 
-                s1 = 'selesai'; s2 = 'selesai'; s3 = 'selesai'; s4 = 'proses'; 
-                progressValue = 75; currentStatus = 'Verifikasi Berkas'; nextStep = 'Tes Kesiapan & Lulus';
+                s1 = 'selesai'; s2 = 'selesai'; s3 = 'selesai'; s4 = 'proses'; s5 = 'tunggu';
+                progressValue = 75; currentStatus = 'Verifikasi Berkas'; nextStep = 'Tes Kesiapan Belajar';
             } else if (currentUser.t2 === true) { 
-                s1 = 'selesai'; s2 = 'selesai'; s3 = 'proses'; s4 = 'tunggu'; 
+                s1 = 'selesai'; s2 = 'selesai'; s3 = 'proses'; s4 = 'tunggu'; s5 = 'tunggu';
                 progressValue = 50; currentStatus = 'Melengkapi Dokumen'; nextStep = 'Verifikasi Berkas';
             } else if (currentUser.t1 === true) { 
-                s1 = 'selesai'; s2 = 'proses'; s3 = 'tunggu'; s4 = 'tunggu'; 
+                s1 = 'selesai'; s2 = 'proses'; s3 = 'tunggu'; s4 = 'tunggu'; s5 = 'tunggu';
                 progressValue = 25; currentStatus = 'Pendaftaran Online'; nextStep = 'Melengkapi Dokumen';
             } else { 
                 s1 = 'proses';
@@ -1567,62 +1565,54 @@
             const elDateUpdate = document.getElementById('dash-date-update');
             if (elDateUpdate) elDateUpdate.innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
 
-            if (dTimelines.length > 0) {
-                let htmlTL = '';
-                dTimelines.forEach((item, index) => {
-                    let st = 'tunggu';
-                    if(index === 0) st = s1;
-                    if(index === 1) st = s2;
-                    if(index === 2) st = s3;
-                    if(index === 3) st = s4;
+            // Hapus ketergantungan database lain, gunakan array statis terhubung ke currentUser
+            const steps = [
+                { judul: 'Pendaftaran Online', deskripsi: 'Pendaftaran formulir siswa.', status: s1 },
+                { judul: 'Melengkapi Dokumen', deskripsi: 'Upload KK dan Akta Kelahiran.', status: s2 },
+                { judul: 'Verifikasi Berkas', deskripsi: 'Pengecekan oleh panitia PMB.', status: s3 },
+                { judul: 'Tes Kesiapan Belajar', deskripsi: 'Pelaksanaan observasi anak.', status: s4 },
+                { judul: 'Pengumuman Diterima', deskripsi: 'Hasil akhir penerimaan.', status: s5 }
+            ];
 
-                    let iconHtml = '';
-                    let opacityClass = '';
+            let htmlTL = '';
+            steps.forEach((item) => {
+                let iconHtml = '';
+                let opacityClass = '';
 
-                    if (st === 'selesai') {
-                        iconHtml = `<div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center"><i class="ph-bold ph-check text-white text-[10px]"></i></div>`;
-                    } else if (st === 'proses') {
-                         iconHtml = `<div class="absolute -left-[13px] top-0 w-6 h-6 bg-brand-gold rounded-full border-4 border-white shadow-sm flex items-center justify-center animate-pulse"><div class="w-2 h-2 bg-white rounded-full"></div></div>`;
-                    } else {
-                        iconHtml = `<div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>`;
-                        opacityClass = 'opacity-50';
-                    }
+                if (item.status === 'selesai') {
+                    iconHtml = `<div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center"><i class="ph-bold ph-check text-white text-[10px]"></i></div>`;
+                } else if (item.status === 'proses') {
+                     iconHtml = `<div class="absolute -left-[13px] top-0 w-6 h-6 bg-brand-gold rounded-full border-4 border-white shadow-sm flex items-center justify-center animate-pulse"><div class="w-2 h-2 bg-white rounded-full"></div></div>`;
+                } else {
+                    iconHtml = `<div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>`;
+                    opacityClass = 'opacity-50';
+                }
 
-                    htmlTL += `
-                    <div class="relative pl-6 ${opacityClass}">
-                        ${iconHtml}
-                        <h4 class="font-semibold text-brand-navy text-sm">${item.judul}</h4>
-                        <p class="text-[10px] text-brand-muted mt-1 leading-relaxed">${item.deskripsi || ''}</p>
-                    </div>`;
-                });
-                containerTimeline.innerHTML = htmlTL;
-            }
+                htmlTL += `
+                <div class="relative pl-6 ${opacityClass}">
+                    ${iconHtml}
+                    <h4 class="font-semibold text-brand-navy text-sm">${item.judul}</h4>
+                    <p class="text-[10px] text-brand-muted mt-1 leading-relaxed">${item.deskripsi}</p>
+                </div>`;
+            });
+            containerTimeline.innerHTML = htmlTL;
         }
 
+        // PENGUMUMAN: Eksklusif mengambil dari kolom `pengumuman` di tabel pendaftar
         const containerPengumuman = document.getElementById('pengumuman-container');
         if(containerPengumuman) {
-            if(dPengumumans.length === 0) {
-                containerPengumuman.innerHTML = '<div class="text-xs text-brand-muted italic py-4 w-full text-center">Belum ada pengumuman terbaru.</div>';
+            if(currentUser && currentUser.pengumuman && currentUser.pengumuman.trim() !== '') {
+                containerPengumuman.innerHTML = `
+                <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="bg-brand-goldlight text-brand-gold text-[10px] font-bold px-2 py-1 rounded-md">INFO SISWA</span>
+                        <span class="text-[10px] text-brand-muted">${new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})}</span>
+                    </div>
+                    <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">Pengumuman Pribadi</h4>
+                    <p class="text-xs text-brand-muted line-clamp-3">${currentUser.pengumuman}</p>
+                </div>`;
             } else {
-                let htmlP = '';
-                dPengumumans.forEach(item => {
-                    let badgeStyle = 'bg-blue-100 text-blue-700';
-                    if (item.tipe_badge === 'PENTING') badgeStyle = 'bg-red-100 text-red-700';
-                    else if (item.tipe_badge === 'UPDATE') badgeStyle = 'bg-brand-goldlight text-brand-gold';
-                    
-                    const tgl = new Date(item.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
-                    
-                    htmlP += `
-                    <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="${badgeStyle} text-[10px] font-bold px-2 py-1 rounded-md">${item.tipe_badge || 'INFO'}</span>
-                            <span class="text-[10px] text-brand-muted">${tgl}</span>
-                        </div>
-                        <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">${item.judul}</h4>
-                        <p class="text-xs text-brand-muted line-clamp-2">${item.deskripsi || ''}</p>
-                    </div>`;
-                });
-                containerPengumuman.innerHTML = htmlP;
+                containerPengumuman.innerHTML = '<div class="text-xs text-brand-muted italic py-4 w-full text-center">Belum ada pengumuman terbaru untuk Anda.</div>';
             }
         }
     }
