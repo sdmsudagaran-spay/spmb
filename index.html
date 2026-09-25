@@ -130,7 +130,6 @@
 <body>
 
 <div id="app-container">
-
     <div id="view-login" class="absolute inset-0 bg-brand-navy flex flex-col items-center justify-center p-6 z-50 transition-opacity duration-500">
         <div class="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
             <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -260,7 +259,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-brand-muted">Status Saat Ini:</p>
-                        <p id="dash-status-text" class="text-sm font-semibold text-brand-navy leading-tight">Menunggu Verifikasi Berkas</p>
+                        <p id="dash-status-text" class="text-sm font-semibold text-brand-navy leading-tight">Menunggu Proses</p>
                     </div>
                 </div>
 
@@ -269,11 +268,11 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-[10px] text-brand-muted uppercase">Tahap Berikutnya</p>
-                        <p class="text-sm font-medium text-brand-navy">Tes Kesiapan Belajar</p>
+                        <p id="dash-next-step" class="text-sm font-medium text-brand-navy">Memuat...</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] text-brand-muted uppercase">Tanggal</p>
-                        <p class="text-sm font-medium text-brand-navy">25 Jan 2027</p>
+                        <p class="text-[10px] text-brand-muted uppercase">Tanggal Update</p>
+                        <p id="dash-date-update" class="text-sm font-medium text-brand-navy">-</p>
                     </div>
                 </div>
             </div>
@@ -297,11 +296,11 @@
                     </div>
                     <span class="text-[10px] font-medium text-brand-navy text-center leading-tight">Hasil<br>Seleksi</span>
                 </button>
-                <button onclick="alertCustom('Sedang menghubungi admin...')" class="btn-press flex flex-col items-center gap-2">
-                    <div class="w-12 h-12 rounded-[16px] bg-white shadow-sm flex items-center justify-center text-blue-500 border border-gray-50">
-                        <i class="ph ph-headset text-2xl"></i>
+                <button onclick="openModal('modal-perlengkapan')" class="btn-press flex flex-col items-center gap-2">
+                    <div class="w-12 h-12 rounded-[16px] bg-white shadow-sm flex items-center justify-center text-orange-500 border border-gray-50">
+                        <i class="ph ph-backpack text-2xl"></i>
                     </div>
-                    <span class="text-[10px] font-medium text-brand-navy text-center leading-tight">Hubungi<br>Admin</span>
+                    <span class="text-[10px] font-medium text-brand-navy text-center leading-tight">Status<br>Barang</span>
                 </button>
             </div>
 
@@ -314,39 +313,22 @@
             </div>
 
             <div class="mb-6">
-                <h3 class="font-heading font-semibold text-brand-navy text-sm mb-3 px-1">Layanan Khusus</h3>
-                <div onclick="openModal('modal-perlengkapan')" class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-[20px] p-4 shadow-sm border border-orange-200 flex items-center justify-between card-hover cursor-pointer btn-press">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-sm shrink-0">
-                            <i class="ph-fill ph-backpack text-2xl"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-heading font-bold text-brand-navy text-sm">Status Perlengkapan</h4>
-                            <p class="text-[10px] text-brand-muted mt-0.5">Cek Seragam & Administrasi PA/PI</p>
-                        </div>
-                    </div>
-                    <i class="ph-bold ph-caret-right text-orange-400"></i>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <h3 class="font-heading font-semibold text-brand-navy text-sm mb-3 px-1">Jadwal Terdekat</h3>
+                <h3 class="font-heading font-semibold text-brand-navy text-sm mb-3 px-1">Broadcast Informasi</h3>
                 <div class="bg-gradient-to-r from-brand-navy to-[#1a3a6c] rounded-[20px] p-4 text-white shadow-premium relative overflow-hidden card-hover">
-                    <i class="ph-fill ph-calendar-check absolute -right-4 -bottom-4 text-7xl text-white opacity-10"></i>
+                    <i class="ph-fill ph-megaphone absolute -right-4 -bottom-4 text-7xl text-white opacity-10"></i>
                     <div class="flex items-center gap-3 mb-2 relative z-10">
-                        <div class="bg-brand-gold rounded-lg px-2 py-1 text-center min-w-[45px]">
-                            <p class="text-[10px] uppercase font-bold leading-none">Jan</p>
-                            <p class="text-lg font-heading font-bold leading-none mt-1">25</p>
+                        <div class="bg-brand-gold rounded-lg p-2 text-center flex items-center justify-center shadow-sm">
+                            <i class="ph-bold ph-bell-ringing text-2xl text-brand-navy"></i>
                         </div>
                         <div>
-                            <p class="font-semibold text-sm">Tes Kesiapan Belajar</p>
+                            <p id="dash-jadwal-judul" class="font-semibold text-sm">Memuat Informasi...</p>
                             <div class="flex items-center gap-2 mt-1 text-xs text-brand-goldlight">
-                                <i class="ph ph-clock"></i> 08.00 WIB
+                                <i class="ph ph-clock"></i> <span id="dash-jadwal-waktu">-</span>
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 text-xs mt-3 pt-3 border-t border-white/20 relative z-10">
-                        <i class="ph ph-map-pin"></i> <span id="dash-ruang">Ruang Utama</span>
+                        <i class="ph ph-info"></i> <span id="dash-jadwal-isi" class="line-clamp-2 leading-relaxed">Silakan cek secara berkala.</span>
                     </div>
                 </div>
             </div>
@@ -357,7 +339,6 @@
                 <a href="#" class="text-xs text-brand-gold font-medium">Lihat Semua</a>
             </div>
             <div class="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 no-scrollbar -mx-5 px-5" id="pengumuman-container">
-                <!-- Data Pengumuman Akan Di-generate Disini -->
                 <div class="text-xs text-brand-muted italic py-4">Memuat pengumuman...</div>
             </div>
         </div>
@@ -396,6 +377,7 @@
     <div id="modal-container" class="absolute inset-0 z-50 pointer-events-none">
         <div id="modal-overlay" class="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-300 pointer-events-none" onclick="closeAllModals()"></div>
 
+        <!-- TIMELINE MODAL -->
         <div id="modal-timeline" class="modal-content absolute bottom-0 left-0 right-0 bg-white rounded-t-[32px] h-[85%] slide-up flex flex-col pointer-events-auto">
             <div class="p-4 flex justify-center shrink-0">
                 <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
@@ -409,12 +391,12 @@
             
             <div class="p-6 overflow-y-auto flex-1">
                 <div class="relative border-l-2 border-gray-100 ml-4 space-y-8 pb-8" id="timeline-container">
-                    <!-- Data Timeline Akan Di-generate Disini -->
                     <div class="text-xs text-brand-muted text-center pt-10">Memuat timeline...</div>
                 </div>
             </div>
         </div>
 
+        <!-- DOKUMEN MODAL -->
         <div id="modal-dokumen" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[90%] slide-up flex flex-col pointer-events-auto">
             <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
                 <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
@@ -426,11 +408,11 @@
                 </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 space-y-4 no-scrollbar" id="dokumen-container">
-                <!-- Data akan di-generate oleh JS berdasarkan database Supabase -->
                 <div class="text-center text-xs text-brand-muted mt-10">Memuat dokumen...</div>
             </div>
         </div>
 
+        <!-- HASIL ANALISIS MODAL -->
         <div id="modal-hasil" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[95%] slide-up flex flex-col pointer-events-auto">
              <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
                 <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
@@ -443,7 +425,6 @@
             </div>
             <div class="flex-1 overflow-y-auto p-5 no-scrollbar pb-10">
                 
-                <!-- TAMBAHAN INFO RUANG ANALISIS -->
                 <div class="bg-white rounded-[20px] p-4 shadow-sm border border-gray-100 mb-4 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
@@ -517,6 +498,7 @@
             </div>
         </div>
 
+        <!-- PEMBAYARAN MODAL -->
         <div id="modal-pembayaran" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[90%] slide-up flex flex-col pointer-events-auto">
              <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
                 <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
@@ -550,31 +532,31 @@
                     <h3 class="font-heading font-semibold text-brand-navy text-sm px-2">Rincian Tagihan</h3>
                     
                     <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                        <div class="space-y-3 mb-4">
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-brand-muted">Pendaftaran</span>
-                                <span id="fin-pendaftaran" class="font-medium text-brand-navy">Rp 0</span>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5">
+                                <span class="text-brand-muted flex items-center gap-2"><i class="ph-bold ph-info text-blue-500"></i> Pendaftaran</span>
+                                <span id="fin-pendaftaran" class="font-medium text-brand-navy"></span>
                             </div>
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-brand-muted">Daftar Ulang</span>
+                            <label class="flex justify-between items-center text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none">
+                                <div class="text-brand-navy font-medium flex items-center gap-2">
+                                    <input type="checkbox" id="chk-daftar-ulang" checked onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> 
+                                    Daftar Ulang
+                                </div>
                                 <span id="fin-daftar_ulang" class="font-medium text-brand-navy">Rp 0</span>
-                            </div>
-                            <div class="flex justify-between items-center text-sm">
-                                <span class="text-brand-muted">Biaya Operasional (BOPD)</span>
+                            </label>
+                            <label class="flex justify-between items-center text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none">
+                                <div class="text-brand-navy font-medium flex items-center gap-2">
+                                    <input type="checkbox" id="chk-bopd" checked onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> 
+                                    Biaya Operasional (BOPD)
+                                </div>
                                 <span id="fin-bopd" class="font-medium text-brand-navy">Rp 0</span>
-                            </div>
+                            </label>
                         </div>
 
                         <div id="fin-discount-section" class="hidden">
                             <hr class="border-dashed border-gray-200 mb-4">
                             <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-2">Potongan Biaya</p>
                             <div id="fin-discount-container" class="space-y-3 mb-4"></div>
-                        </div>
-
-                        <div id="fin-angsuran-section" class="hidden">
-                            <hr class="border-dashed border-gray-200 mb-4">
-                            <p class="text-[10px] font-bold text-brand-muted uppercase tracking-wider mb-2">Simulasi Angsuran BOPD</p>
-                            <div id="fin-angsuran-container" class="space-y-3 mb-4"></div>
                         </div>
 
                         <hr class="border-dashed border-gray-200 mb-4">
@@ -646,9 +628,7 @@
                             <div id="preview-bukti-container" class="hidden mt-3 bg-green-50 border border-green-200 rounded-xl p-4 flex flex-col gap-4 relative z-10 transition-all">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3 overflow-hidden">
-                                        <!-- Pratinjau Gambar -->
                                         <img id="img-preview-bukti" class="w-12 h-12 object-cover rounded-lg border border-green-200 hidden bg-white shadow-sm" alt="Preview">
-                                        <!-- Pratinjau PDF (jika file berupa PDF) -->
                                         <div id="icon-preview-pdf" class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center shrink-0 hidden shadow-sm">
                                             <i class="ph-fill ph-file-pdf text-2xl"></i>
                                         </div>
@@ -661,7 +641,6 @@
                                         <i class="ph ph-trash text-lg"></i>
                                     </button>
                                 </div>
-                                <!-- Tombol Eksekusi Bayar -->
                                 <button id="btn-submit-pembayaran" onclick="submitPembayaran()" class="w-full bg-green-600 text-white font-medium rounded-lg py-3 shadow-sm hover:bg-green-700 flex justify-center items-center gap-2 text-sm transition-all btn-press">
                                     Kirim Pembayaran <i class="ph-bold ph-paper-plane-right"></i>
                                 </button>
@@ -692,6 +671,7 @@
             </div>
         </div>
 
+        <!-- PROFIL MODAL -->
         <div id="modal-profil" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[95%] slide-up flex flex-col pointer-events-auto">
             <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
                 <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
@@ -816,7 +796,6 @@
                         </div>
                     </div>
 
-                    <!-- TOMBOL KELUAR APLIKASI -->
                     <button onclick="handleLogout()" class="w-full bg-red-50 text-red-600 font-semibold rounded-[20px] py-4 mt-2 border border-red-100 flex justify-center items-center gap-2 btn-press hover:bg-red-100 transition-colors shadow-sm">
                         <i class="ph-bold ph-sign-out text-lg"></i>
                         Keluar Aplikasi
@@ -826,6 +805,7 @@
             </div>
         </div>
 
+        <!-- PERLENGKAPAN MODAL -->
         <div id="modal-perlengkapan" class="modal-content absolute bottom-0 left-0 right-0 bg-brand-bg rounded-t-[32px] h-[80%] slide-up flex flex-col pointer-events-auto">
             <div class="p-4 flex justify-center shrink-0 bg-white rounded-t-[32px]">
                 <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
@@ -851,7 +831,6 @@
                     <span class="text-[10px] text-brand-muted italic">Otomatis dari sistem</span>
                 </div>
 
-                <!-- Kontainer Daftar Perlengkapan Dinamis -->
                 <div id="list-perlengkapan-container" class="space-y-3">
                     <div class="text-center text-xs text-brand-muted mt-8">Memuat daftar perlengkapan...</div>
                 </div>
@@ -868,7 +847,6 @@
     const SUPABASE_KEY = 'sb_publishable_jBXJV3WzlzbTlRkpEqGebA_BOlcBWoO';
 
     let dynamicMenus = [];
-    
     let chartInstance = null;
     let currentUser = null; 
 
@@ -881,13 +859,13 @@
 
     const quotesIlmu = [
         "Menuntut ilmu itu wajib bagi setiap muslim. (HR. Ibnu Majah)",
-        "Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan memudahkan baginya jalan ke surga. (HR. Muslim)",
-        "Ilmu itu lebih baik daripada harta. Ilmu menjaga engkau dan engkau menjaga harta. (Ali bin Abi Thalib)",
-        "Barangsiapa menginginkan dunia, hendaklah dengan ilmu. Barangsiapa menginginkan akhirat, hendaklah dengan ilmu. (Syafi'i)",
+        "Barangsiapa menempuh jalan untuk mencari ilmu, Allah akan memudahkan baginya jalan ke surga.",
+        "Ilmu itu lebih baik daripada harta. Ilmu menjaga engkau dan engkau menjaga harta.",
+        "Barangsiapa menginginkan dunia, hendaklah dengan ilmu.",
         "Tuntutlah ilmu dari buaian hingga ke liang lahat.",
-        "Ilmu adalah cahaya, dan cahaya Allah tidak akan diberikan kepada pelaku maksiat. (Imam Syafi'i)",
-        "Barangsiapa keluar dalam rangka menuntut ilmu, maka ia berada di jalan Allah sampai ia kembali. (HR. Tirmidzi)",
-        "Sebaik-baik kalian adalah yang mempelajari Al-Qur'an dan mengajarkannya. (HR. Bukhari)",
+        "Ilmu adalah cahaya, dan cahaya Allah tidak akan diberikan kepada pelaku maksiat.",
+        "Barangsiapa keluar dalam rangka menuntut ilmu, maka ia berada di jalan Allah.",
+        "Sebaik-baik kalian adalah yang mempelajari Al-Qur'an dan mengajarkannya.",
         "Satu jam merenungkan ilmu lebih baik daripada ibadah sunnah satu tahun.",
         "Ilmu tanpa amal bagaikan pohon yang tidak berbuah."
     ];
@@ -899,12 +877,10 @@
         
         if (passInput.type === 'password') {
             passInput.type = 'text';
-            icon.classList.remove('ph-eye');
-            icon.classList.add('ph-eye-slash');
+            icon.classList.replace('ph-eye', 'ph-eye-slash');
         } else {
             passInput.type = 'password';
-            icon.classList.remove('ph-eye-slash');
-            icon.classList.add('ph-eye');
+            icon.classList.replace('ph-eye-slash', 'ph-eye');
         }
     }
 
@@ -912,6 +888,64 @@
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
     }
 
+    // FUNGSI BARU: Menghitung tagihan dinamis berdasarkan kotak centang
+    function hitungUlangTagihan() {
+        if (!window.tagihanData) return;
+        
+        const chkDaftar = document.getElementById('chk-daftar-ulang')?.checked || false;
+        const chkBopd = document.getElementById('chk-bopd')?.checked || false;
+        
+        let subtotal = 0;
+        if (chkDaftar) subtotal += window.tagihanData.daftarUlang;
+        if (chkBopd) subtotal += window.tagihanData.bopd;
+        
+        let appliedDiscount = 0;
+        // Potongan hanya memotong jika tagihan Daftar Ulang dipilih
+        if (chkDaftar) {
+            appliedDiscount = window.tagihanData.totalDiskon;
+        }
+        
+        let totalTagihan = subtotal - appliedDiscount;
+        if (totalTagihan < 0) totalTagihan = 0;
+        
+        window.rawTotalTagihan = totalTagihan.toString(); // Simpan nominal murni untuk disalin
+        
+        const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val || '-'; };
+        safeSet('fin-total', formatRupiah(totalTagihan));
+        safeSet('fin-hero-total', formatRupiah(totalTagihan));
+        safeSet('fin-nominal-transfer', formatRupiah(totalTagihan));
+        
+        // Sembunyikan atau tampilkan informasi pemotongan diskon
+        const discSection = document.getElementById('fin-discount-section');
+        if (discSection) {
+            if (chkDaftar && window.tagihanData.totalDiskon > 0) {
+                discSection.classList.remove('hidden');
+            } else {
+                discSection.classList.add('hidden');
+            }
+        }
+
+        // Kunci atau buka tombol Lanjut Bayar untuk keamanan
+        const btnLanjut = document.getElementById('btn-lanjut-bayar');
+        if (btnLanjut) {
+            if (totalTagihan > 0) {
+                btnLanjut.disabled = false;
+                btnLanjut.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                btnLanjut.disabled = true;
+                btnLanjut.classList.add('opacity-50', 'cursor-not-allowed');
+                
+                // Tutup otomatis form instruksi bank jika nominal 0
+                const bankInfo = document.getElementById('fin-bank-info');
+                if (bankInfo && !bankInfo.classList.contains('hidden')) {
+                    bankInfo.classList.add('hidden');
+                    document.getElementById('btn-lanjut-bayar')?.classList.remove('hidden');
+                }
+            }
+        }
+    }
+
+    // FUNGSI INTI: Update Semua UI Dashboard dan Modal
     function updateDashboardUI(user) {
         if (!user) return;
 
@@ -928,19 +962,6 @@
         
         const elHasilRuang = document.getElementById('hasil-ruang');
         if(elHasilRuang) elHasilRuang.innerText = user.ruang || 'Menunggu Jadwal';
-
-        // UPDATE PROGRES BAR DARI DATABASE
-        const progressValue = user.progress || 0;
-        const progressStatus = user.tahap || 'Pendaftaran Diproses';
-        
-        const elProgText = document.getElementById('dash-progress-text');
-        if (elProgText) elProgText.innerText = progressValue + '%';
-        
-        const elProgBar = document.getElementById('dash-progress-bar');
-        if (elProgBar) elProgBar.style.setProperty('--target-width', progressValue + '%');
-        
-        const elStatusText = document.getElementById('dash-status-text');
-        if (elStatusText) elStatusText.innerText = progressStatus;
 
         // 2. Profil Siswa
         const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val || '-'; };
@@ -962,8 +983,7 @@
         safeSet('prof-pend_ibu', user.pend_ibu);
         safeSet('prof-pekrj_ibu', user.pekrj_ibu);
 
-        // 3. Administrasi & Perlengkapan (Daftar Dinamis dari tabel perlengkapan)
-        // Pemetaan nama barang dengan kolom di tabel (s1 s/d s13)
+        // 3. Administrasi & Perlengkapan
         const perlengkapanItems = [
             { key: 'ambil_souvenir', label: 'Souvenir Pendaftaran', icon: 'ph-gift' },
             { key: 's1', label: 'Administrasi PA / PI', icon: 'ph-users' },
@@ -985,9 +1005,7 @@
         if (containerPerlengkapan) {
             let htmlList = '';
             perlengkapanItems.forEach(item => {
-                const isTaken = user[item.key] === true; // Mengecek apakah di database bernilai true
-                
-                // Menentukan warna dan ikon berdasarkan status
+                const isTaken = user[item.key] === true; 
                 const bgClass = isTaken ? 'bg-green-50 border-green-100' : 'bg-white border-gray-100';
                 const iconColor = isTaken ? 'text-green-500' : 'text-brand-navy opacity-50';
                 const statusBg = isTaken ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200';
@@ -1010,7 +1028,7 @@
             containerPerlengkapan.innerHTML = htmlList;
         }
 
-        // 4. Keuangan (Menyesuaikan dengan BIGINT di Supabase)
+        // 4. Keuangan 
         const pendaftaran = parseInt(user.pendaftaran) || 0;
         
         let daftarUlang = parseInt(user.daftar_ulang) || 0;
@@ -1022,43 +1040,39 @@
         const earlyBird = parseInt(user.early_bird) || 0;
         const kaderAum = parseInt(user.kader_aum) || 0;
 
-        // Pendaftaran - Centang Hijau / Silang Merah
+        // Pendaftaran - Centang Hijau / Silang Merah (Bebas dari hitungan)
         const elPend = document.getElementById('fin-pendaftaran');
         if (elPend) {
-            if (pendaftaran > 0) { // Berarti sudah mendaftar & bayar
-                elPend.innerHTML = `<div class="w-5 h-5 bg-green-100 border border-green-300 rounded-full flex items-center justify-center shadow-sm"><i class="ph-bold ph-check text-green-600 text-[10px]"></i></div>`;
-            } else { // Belum mendaftar / data pendaftaran 0
-                elPend.innerHTML = `<div class="w-5 h-5 bg-red-100 border border-red-300 rounded-full flex items-center justify-center shadow-sm"><i class="ph-bold ph-x text-red-600 text-[10px]"></i></div>`;
+            if (pendaftaran > 0) { 
+                elPend.innerHTML = `<span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas di Kasir</span>`;
+            } else { 
+                elPend.innerHTML = `<span class="bg-red-100 text-red-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-red-200"><i class="ph-bold ph-x"></i> Belum Lunas</span>`;
             }
         }
 
-        // Aturan Khusus: Tampilkan '=' jika BOPD 0
         safeSet('fin-daftar_ulang', formatRupiah(daftarUlang));
         safeSet('fin-bopd', bopd === 0 ? '=' : formatRupiah(bopd));
 
         let totalDiskon = earlyBird + kaderAum;
-        // Pendaftaran tidak lagi ditambahkan ke total tagihan karena menggunakan simbol status
-        let totalTagihan = (daftarUlang + bopd) - totalDiskon;
-        window.rawTotalTagihan = totalTagihan.toString(); // untuk fitur copy
+        
+        // Simpan data di memori global agar fungsi hitungUlangTagihan bisa membacanya
+        window.tagihanData = {
+            daftarUlang: daftarUlang,
+            bopd: bopd,
+            totalDiskon: totalDiskon
+        };
 
-        safeSet('fin-total', formatRupiah(totalTagihan));
-        safeSet('fin-hero-total', formatRupiah(totalTagihan));
-        safeSet('fin-nominal-transfer', formatRupiah(totalTagihan)); // Tampil di instruksi bayar
-
-        // Tampilkan Diskon jika ada
+        // Render HTML tulisan potongan harga
         const discSection = document.getElementById('fin-discount-section');
         const discContainer = document.getElementById('fin-discount-container');
         if (discSection && discContainer) {
-            if (totalDiskon > 0) {
-                discSection.classList.remove('hidden');
-                let discHtml = '';
-                if(earlyBird > 0) discHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-gold font-medium">Potongan Early Bird</span><span class="font-bold text-brand-gold">-${formatRupiah(earlyBird)}</span></div>`;
-                if(kaderAum > 0) discHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-gold font-medium">Kader AUM</span><span class="font-bold text-brand-gold">-${formatRupiah(kaderAum)}</span></div>`;
-                discContainer.innerHTML = discHtml;
-            } else {
-                discSection.classList.add('hidden');
-            }
+            let discHtml = '';
+            if(earlyBird > 0) discHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-gold font-medium">Potongan Early Bird</span><span class="font-bold text-brand-gold">-${formatRupiah(earlyBird)}</span></div>`;
+            if(kaderAum > 0) discHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-gold font-medium">Kader AUM</span><span class="font-bold text-brand-gold">-${formatRupiah(kaderAum)}</span></div>`;
+            discContainer.innerHTML = discHtml;
         }
+
+        hitungUlangTagihan();
 
         // 4.5. Logika Tampilan Riwayat Transaksi & Tombol Cetak Struk
         const riwayatSection = document.getElementById('fin-riwayat-section');
@@ -1122,7 +1136,7 @@
             else if (user.unggah_kk) { iconKk = 'ph-clock'; colorKk = 'text-yellow-500'; bgKk = 'bg-yellow-50'; statusKk = 'Menunggu Verifikasi'; textBtnKk = 'Lihat'; }
             
             htmlDok += `
-                <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between">
+                <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg ${bgKk} flex items-center justify-center ${colorKk} shrink-0">
                             <i class="ph-fill ${iconKk} text-xl"></i>
@@ -1168,7 +1182,6 @@
     }
 
     async function handleLogin() {
-        // Sembunyikan error sebelumnya jika ada
         const errEl = document.getElementById('login-error');
         if (errEl) errEl.classList.add('hidden');
 
@@ -1191,8 +1204,6 @@
         let isValid = false;
 
         try {
-            // Karena tabel dipisah (pendaftar, keuangan, analisis, perlengkapan), 
-            // kita tarik data dari tabel 'pendaftar' dulu sebagai verifikasi utama
             const urlSearch = `${SUPABASE_URL}pendaftar?nama_murid=ilike.*${encodeURIComponent(userInput)}*&select=*`;
             const response = await fetch(urlSearch, {
                 method: 'GET',
@@ -1211,26 +1222,22 @@
                         const namaLengkap = userData.nama_murid || '';
                         const kataPertama = namaLengkap.trim().split(/\s+/)[0].toLowerCase();
                         
-                        // Mencocokkan dengan kolom 'password' (Sesuai skema baru, tidak lagi mengecek kolom 'no')
                         if (kataPertama === userInput && userData.password === passInput) {
                             isValid = true;
                             
                             // TARIK DATA GABUNGAN DARI TABEL LAIN
-                            // Tarik Keuangan
                             let keuData = {};
                             try {
                                 const keuRes = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(keuRes.ok) { const keu = await keuRes.json(); if(keu.length > 0) keuData = keu[0]; }
                             } catch(e) {}
                             
-                            // Tarik Analisis
                             let analData = {};
                             try {
                                 const analRes = await fetch(`${SUPABASE_URL}analisis?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(analRes.ok) { const anal = await analRes.json(); if(anal.length > 0) analData = anal[0]; }
                             } catch(e) {}
                             
-                            // Tarik Perlengkapan
                             let perData = {};
                             try {
                                 const perRes = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
@@ -1240,8 +1247,7 @@
                             // Gabungkan semua data menjadi satu object currentUser
                             currentUser = { ...userData, ...keuData, ...analData, ...perData };
                             
-                            // KUNCI BIODATA: Memastikan biodata mutlak membaca dari tabel 'pendaftar' (userData) 
-                            // agar tidak tertimpa oleh tabel lain yang mungkin nilainya kosong/null
+                            // KUNCI BIODATA
                             const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
                             bioKeys.forEach(k => { 
                                 if(userData[k] !== undefined && userData[k] !== null) {
@@ -1257,31 +1263,13 @@
         } catch (error) {
             console.warn("Gagal terhubung ke server", error);
         }
-        
-        if (!isValid && userInput === 'murid' && passInput === 'berkah') {
-            isValid = true;
-            currentUser = {
-                id: 'dummy-123',
-                nama_murid: 'Ahmad Dummy', no_ppdb: 'SPMB-2027-DUMMY', jk: 'L',
-                tempat_lahir: 'Wonosobo', tgl_lahir: '2019-05-14',
-                ayah: 'Budi Santoso', agama_ayah: 'Islam', pend_ayah: 'S1', pekrj_ayah: 'PNS',
-                ibu: 'Siti Aminah', agama_ibu: 'Islam', pend_ibu: 'D3', pekrj_ibu: 'Wiraswasta',
-                alamat: 'Jl. Sudagaran No.12, Wonosobo', tk: 'TK ABA Sudagaran',
-                mengenal_huruf: 85, mengenal_bilangan: 90, menggunting_dan_menempel_puzzel: 80,
-                melafalkan_surat_pendek_doa_harian: 95, menyanyi_lagu_nasional: 88, interview: 92,
-                pendaftaran: 200000, daftar_ulang: 1000000, bopd: 1500000,
-                early_bird: 100000, kader_aum: 50000, bopd_lainnya: 50000,
-                bopd1: 500000, ketbopd1: 'Juli 2027', bopd2: 500000, ketbopd2: 'Agustus 2027', bopd3: 500000, ketbopd3: 'September 2027',
-                konfirmasi: true, kasir: 'Ust. Admin'
-            };
-        }
 
         btn.innerHTML = originalText;
         btn.disabled = false;
         btn.classList.remove('opacity-80', 'cursor-not-allowed');
 
         if (isValid) {
-            loginError.classList.add('hidden');
+            if (loginError) loginError.classList.add('hidden');
             updateDashboardUI(currentUser); 
             
             loadDataSistem();
@@ -1312,17 +1300,17 @@
                         
                         viewDashboard.classList.remove('hidden');
                         viewDashboard.classList.add('flex', 'fade-enter-active');
-                        // renderDynamicMenu() kini dipanggil setelah loadDataSistem selesai
+
                         const pb = document.querySelector('.progress-animate');
                         if(pb) {
                             pb.style.animation = 'none';
                             pb.offsetHeight; 
                             pb.style.animation = null;
                         }
-                    }, 500); // Durasi fade out opening
-                }, 3500); // Durasi tayang quote (3,5 detik)
+                    }, 500); 
+                }, 3500); 
 
-            }, 300); // Durasi fade out login
+            }, 300); 
         } else {
             showLoginError("Username atau password salah.");
         }
@@ -1330,7 +1318,6 @@
 
     async function loadDataSistem() {
         try {
-            // Mengambil dari tabel pengaturan_sistem dan menu_aplikasi
             fetch(`${SUPABASE_URL}menu_aplikasi?aktif=eq.true`, {
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
             }).then(res => res.json()).then(data => {
@@ -1345,87 +1332,135 @@
             }).then(res => res.json()).then(data => {
                 if(data && !data.error && data.length > 0) {
                     const setting = data[0];
+                    window.currentSettingSistem = setting; 
                     renderPengaturanSistem(setting);
                 }
             }).catch(err => console.warn('Gagal load pengaturan sistem', err));
+
+            fetch(`${SUPABASE_URL}pengumuman_sistem?is_active=eq.true&order=urutan.asc,tanggal.desc`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            }).then(res => res.json()).then(data => {
+                if(data && !data.error) {
+                    renderPengumumanSistem(data);
+                }
+            }).catch(err => console.warn('Gagal load pengumuman sistem', err));
             
         } catch (error) {
             console.warn("Gagal terhubung ke sistem pengaturan");
         }
     }
 
-    function renderPengaturanSistem(setting) {
-        // Render Pengumuman Tunggal (Berdasarkan pg_tipe, pg_waktu, pg_judul, pg_isi)
-        const containerPengumuman = document.getElementById('pengumuman-container');
-        if(containerPengumuman) {
-            if(!setting.pg_judul) {
-                containerPengumuman.innerHTML = '<div class="text-xs text-brand-muted italic py-4 w-full text-center">Belum ada pengumuman terbaru.</div>';
-            } else {
-                let badgeStyle = 'bg-blue-100 text-blue-700';
-                if (setting.pg_tipe === 'PENTING') badgeStyle = 'bg-red-100 text-red-700';
-                else if (setting.pg_tipe === 'UPDATE') badgeStyle = 'bg-brand-goldlight text-brand-gold';
-                
-                containerPengumuman.innerHTML = `
-                <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="${badgeStyle} text-[10px] font-bold px-2 py-1 rounded-md">${setting.pg_tipe || 'INFO'}</span>
-                        <span class="text-[10px] text-brand-muted">${setting.pg_waktu || 'Baru saja'}</span>
-                    </div>
-                    <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">${setting.pg_judul}</h4>
-                    <p class="text-xs text-brand-muted line-clamp-2">${setting.pg_isi || ''}</p>
-                </div>`;
-            }
-        }
+    function renderPengumumanSistem(dataAll) {
+        const dTimelines = dataAll.filter(d => d.kategori === 'timeline');
+        const dPengumumans = dataAll.filter(d => d.kategori === 'pengumuman');
 
-        // Render Timeline (tl_1 sampai tl_4 dari pengaturan_sistem dikombinasikan dengan t1 s/d t4 dari progres siswa)
         const containerTimeline = document.getElementById('timeline-container');
         if(containerTimeline && currentUser) {
-            
-            // Logika kaskade: Menentukan status berdasarkan urutan penyelesaian
             let s1 = 'tunggu', s2 = 'tunggu', s3 = 'tunggu', s4 = 'tunggu';
+            let progressValue = 0;
+            let currentStatus = 'Menunggu Mulai';
+            let nextStep = 'Pendaftaran';
             
             if (currentUser.t4 === true) { 
                 s1 = 'selesai'; s2 = 'selesai'; s3 = 'selesai'; s4 = 'selesai'; 
+                progressValue = 100; currentStatus = 'Tes Kesiapan & Lulus'; nextStep = 'Tuntas (Selesai)';
             } else if (currentUser.t3 === true) { 
                 s1 = 'selesai'; s2 = 'selesai'; s3 = 'selesai'; s4 = 'proses'; 
+                progressValue = 75; currentStatus = 'Verifikasi Berkas'; nextStep = 'Tes Kesiapan & Lulus';
             } else if (currentUser.t2 === true) { 
                 s1 = 'selesai'; s2 = 'selesai'; s3 = 'proses'; s4 = 'tunggu'; 
+                progressValue = 50; currentStatus = 'Melengkapi Dokumen'; nextStep = 'Verifikasi Berkas';
             } else if (currentUser.t1 === true) { 
                 s1 = 'selesai'; s2 = 'proses'; s3 = 'tunggu'; s4 = 'tunggu'; 
+                progressValue = 25; currentStatus = 'Pendaftaran Online'; nextStep = 'Melengkapi Dokumen';
             } else { 
-                s1 = 'proses'; // Jika belum ada yang dicentang, maka tahap 1 sedang dalam proses
+                s1 = 'proses';
+                progressValue = 5; currentStatus = 'Belum Memulai'; nextStep = 'Pendaftaran Online';
             }
 
-            const tl = [
-                { judul: setting.tl_1, status: s1 },
-                { judul: setting.tl_2, status: s2 },
-                { judul: setting.tl_3, status: s3 },
-                { judul: setting.tl_4, status: s4 }
-            ];
+            const elProgText = document.getElementById('dash-progress-text');
+            if (elProgText) elProgText.innerText = progressValue + '%';
             
-            let html = '';
-            tl.forEach((item, index) => {
-                let iconHtml = '';
-                let opacityClass = '';
+            const elProgBar = document.getElementById('dash-progress-bar');
+            if (elProgBar) elProgBar.style.setProperty('--target-width', progressValue + '%');
+            
+            const elStatusText = document.getElementById('dash-status-text');
+            if (elStatusText) elStatusText.innerText = currentStatus;
+            
+            const elNextStep = document.getElementById('dash-next-step');
+            if (elNextStep) elNextStep.innerText = nextStep;
+            
+            const elDateUpdate = document.getElementById('dash-date-update');
+            if (elDateUpdate) elDateUpdate.innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
 
-                if (item.status === 'selesai') {
-                    iconHtml = `<div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center"><i class="ph-bold ph-check text-white text-[10px]"></i></div>`;
-                } else if (item.status === 'proses') {
-                     // Status saat ini berjalan (berkedip)
-                     iconHtml = `<div class="absolute -left-[13px] top-0 w-6 h-6 bg-brand-gold rounded-full border-4 border-white shadow-sm flex items-center justify-center animate-pulse"><div class="w-2 h-2 bg-white rounded-full"></div></div>`;
-                } else {
-                    iconHtml = `<div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>`;
-                    opacityClass = 'opacity-50';
-                }
+            if (dTimelines.length > 0) {
+                let htmlTL = '';
+                dTimelines.forEach((item, index) => {
+                    let st = 'tunggu';
+                    if(index === 0) st = s1;
+                    if(index === 1) st = s2;
+                    if(index === 2) st = s3;
+                    if(index === 3) st = s4;
 
-                html += `
-                <div class="relative pl-6 ${opacityClass}">
-                    ${iconHtml}
-                    <h4 class="font-semibold text-brand-navy text-sm">${item.judul || 'Tahapan'}</h4>
-                </div>`;
-            });
-            containerTimeline.innerHTML = html;
+                    let iconHtml = '';
+                    let opacityClass = '';
+
+                    if (st === 'selesai') {
+                        iconHtml = `<div class="absolute -left-[11px] top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center"><i class="ph-bold ph-check text-white text-[10px]"></i></div>`;
+                    } else if (st === 'proses') {
+                         iconHtml = `<div class="absolute -left-[13px] top-0 w-6 h-6 bg-brand-gold rounded-full border-4 border-white shadow-sm flex items-center justify-center animate-pulse"><div class="w-2 h-2 bg-white rounded-full"></div></div>`;
+                    } else {
+                        iconHtml = `<div class="absolute -left-[9px] top-0 w-4 h-4 bg-gray-200 rounded-full border-4 border-white shadow-sm"></div>`;
+                        opacityClass = 'opacity-50';
+                    }
+
+                    htmlTL += `
+                    <div class="relative pl-6 ${opacityClass}">
+                        ${iconHtml}
+                        <h4 class="font-semibold text-brand-navy text-sm">${item.judul}</h4>
+                        <p class="text-[10px] text-brand-muted mt-1 leading-relaxed">${item.deskripsi || ''}</p>
+                    </div>`;
+                });
+                containerTimeline.innerHTML = htmlTL;
+            }
         }
+
+        const containerPengumuman = document.getElementById('pengumuman-container');
+        if(containerPengumuman) {
+            if(dPengumumans.length === 0) {
+                containerPengumuman.innerHTML = '<div class="text-xs text-brand-muted italic py-4 w-full text-center">Belum ada pengumuman terbaru.</div>';
+            } else {
+                let htmlP = '';
+                dPengumumans.forEach(item => {
+                    let badgeStyle = 'bg-blue-100 text-blue-700';
+                    if (item.tipe_badge === 'PENTING') badgeStyle = 'bg-red-100 text-red-700';
+                    else if (item.tipe_badge === 'UPDATE') badgeStyle = 'bg-brand-goldlight text-brand-gold';
+                    
+                    const tgl = new Date(item.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
+                    
+                    htmlP += `
+                    <div class="snap-center shrink-0 w-64 bg-white rounded-[20px] p-4 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="${badgeStyle} text-[10px] font-bold px-2 py-1 rounded-md">${item.tipe_badge || 'INFO'}</span>
+                            <span class="text-[10px] text-brand-muted">${tgl}</span>
+                        </div>
+                        <h4 class="font-semibold text-brand-navy text-sm mb-2 leading-tight">${item.judul}</h4>
+                        <p class="text-xs text-brand-muted line-clamp-2">${item.deskripsi || ''}</p>
+                    </div>`;
+                });
+                containerPengumuman.innerHTML = htmlP;
+            }
+        }
+    }
+
+    function renderPengaturanSistem(setting) {
+        const elJudul = document.getElementById('dash-jadwal-judul');
+        const elWaktu = document.getElementById('dash-jadwal-waktu');
+        const elIsi = document.getElementById('dash-jadwal-isi');
+        
+        if (elJudul) elJudul.innerText = setting.pg_judul || 'Tidak ada jadwal terdekat';
+        if (elWaktu) elWaktu.innerText = setting.pg_waktu || '-';
+        if (elIsi) elIsi.innerText = setting.pg_isi || 'Belum ada informasi tambahan.';
     }
 
     function renderDynamicMenu() {
@@ -1434,11 +1469,9 @@
         container.innerHTML = ''; 
 
         dynamicMenus.forEach(menu => {
-            // Karena skema menu baru tidak memiliki kolom color, bg, style, dan action, kita tentukan fallback dasar
             const el = document.createElement('div');
             el.className = `bento-item bento-1x1 border border-gray-100 shadow-sm card-hover cursor-pointer btn-press bg-white`;
             
-            // Map letak (misal: /timeline) ke action openModal
             if (menu.letak === '/timeline') el.setAttribute('onclick', "openModal('modal-timeline')");
             else if (menu.letak === '/pembayaran') el.setAttribute('onclick', "openModal('modal-pembayaran')");
             else if (menu.letak === '/dokumen') el.setAttribute('onclick', "openModal('modal-dokumen')");
@@ -1496,7 +1529,6 @@
         const ma = currentUser?.melafalkan_surat_pendek_doa_harian ?? 0; 
         const inv = currentUser?.interview ?? 0;
 
-        // Mengambil deskripsi langsung dari kolom-kolom tabel 'analisis' Supabase
         const fallback = 'Belum ada catatan dari penguji.';
         const ket_mh = currentUser?.ket_mengenal_huruf || fallback;
         const ket_mb = currentUser?.ket_mengenal_bilangan || fallback;
@@ -1691,7 +1723,6 @@
         btnSubmit.disabled = true;
 
         try {
-            // Memperbarui status pembayaran di tabel KEUANGAN saja sesuai skema baru
             const res2 = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${currentUser.no_ppdb}`, {
                 method: 'PATCH',
                 headers: {
@@ -1704,9 +1735,8 @@
             if (res2.ok) {
                 alertCustom("Pembayaran terkirim ke sistem! Menunggu verifikasi.");
                 currentUser.bukti_transfer = base64Data;
-                updateDashboardUI(currentUser); // Refresh antarmuka otomatis
+                updateDashboardUI(currentUser);
                 
-                // Menutup form bank, pindah ke tampilan riwayat transaksi
                 document.getElementById('fin-bank-info')?.classList.add('hidden');
             } else {
                 alertCustom("Gagal mengirim data. Cek koneksi Anda.");
@@ -1777,7 +1807,6 @@
         if (!currentUser) return;
         alertCustom("Menyinkronkan data...");
         try {
-            // Tarik ulang data pendaftar sebagai base
             const response = await fetch(`${SUPABASE_URL}pendaftar?no_ppdb=eq.${currentUser.no_ppdb}&select=*`, {
                 method: 'GET',
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
@@ -1797,10 +1826,8 @@
                     let perData = {};
                     try { const res = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) perData = d[0]; } } catch(e) {}
                     
-                    // Gabungkan semua data
                     currentUser = { ...userData, ...keuData, ...analData, ...perData };
                     
-                    // KUNCI BIODATA: Memastikan biodata mutlak membaca dari tabel 'pendaftar' (userData)
                     const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
                     bioKeys.forEach(k => { 
                         if(userData[k] !== undefined && userData[k] !== null) {
@@ -1809,6 +1836,7 @@
                     });
 
                     updateDashboardUI(currentUser);
+                    loadDataSistem(); 
                     alertCustom("Data berhasil diperbarui!");
                 }
             } else {
@@ -1827,7 +1855,6 @@
         btnUnduh.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Proses...';
         btnUnduh.disabled = true;
 
-        // Mempersiapkan data hitungan untuk struk
         const tglCetak = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
         let daftarUlang = parseInt(userData.daftar_ulang) || ((userData.jk === 'P' || userData.jk === 'p') ? 3850000 : 3780000);
         let bopd = parseInt(userData.bopd) || 0;
@@ -1836,7 +1863,6 @@
         let totalDiskon = earlyBird + kaderAum;
         let totalTagihan = (daftarUlang + bopd) - totalDiskon;
 
-        // 1. Membuat Elemen Struk Virtual (Ukuran Standar Mesin Kasir 80mm / ~300px)
         const strukDiv = document.createElement('div');
         strukDiv.style.position = 'absolute';
         strukDiv.style.left = '-9999px';
@@ -1848,10 +1874,9 @@
         strukDiv.style.padding = '20px';
         strukDiv.style.boxSizing = 'border-box';
 
-        // 2. Merakit Desain Struk
         strukDiv.innerHTML = `
             <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 15px;">
-                <img src="https://iili.io/nuUTLcN.md.png" style="width: 50px; height: 50px; margin-bottom: 8px; filter: grayscale(100%);">
+                <img src="https://iili.io/nuUTLcN.md.png" style="width: 50px; height: 50px; margin-bottom: 8px; filter: grayscale(100%); display: block; margin-left: auto; margin-right: auto;">
                 <h3 style="margin: 0; font-size: 15px; font-weight: bold;">SD MUH SUDAGARAN</h3>
                 <p style="margin: 3px 0 0 0; font-size: 11px;">Struk Pembayaran PMB Valid</p>
             </div>
@@ -1888,7 +1913,6 @@
         
         document.body.appendChild(strukDiv);
 
-        // 3. Render ke PNG Menggunakan html2canvas
         if (typeof html2canvas === 'undefined') {
             alertCustom("Sistem struk sedang dimuat, coba lagi sebentar.");
             document.body.removeChild(strukDiv);
@@ -1898,19 +1922,18 @@
         }
 
         html2canvas(strukDiv, {
-            scale: 2, // Kualitas HD
+            scale: 2,
             backgroundColor: "#ffffff",
             logging: false,
-            useCORS: true // Mengizinkan logo eksternal
+            useCORS: true
         }).then(canvas => {
             const imgData = canvas.toDataURL("image/png");
             const link = document.createElement('a');
             
-            // Nama File Unik Berdasarkan Nama Murid
             const safeName = (userData.nama_murid || 'Siswa').replace(/[^a-zA-Z0-9]/g, '_');
             link.download = `STRUK_PMB_${safeName}.png`;
             link.href = imgData;
-            link.click(); // Eksekusi Download
+            link.click(); 
             
             document.body.removeChild(strukDiv);
             btnUnduh.innerHTML = originalHtml;
@@ -1924,36 +1947,29 @@
         });
     }
 
-    // FUNGSI LOGOUT (KELUAR APLIKASI)
     function handleLogout() {
-        closeAllModals(); // Menutup jendela profil
+        closeAllModals();
         
         setTimeout(() => {
-            // Hapus data sesi siswa
             currentUser = null;
             
-            // Bersihkan kolom password (agar tidak bisa langsung ditekan masuk lagi)
             const passInput = document.getElementById('login-password');
             if (passInput) passInput.value = '';
             
-            // Sembunyikan Dashboard
             const viewDashboard = document.getElementById('view-dashboard');
             viewDashboard.classList.remove('flex', 'fade-enter-active');
             viewDashboard.classList.add('hidden');
             
-            // Tampilkan kembali layar Login
             const viewLogin = document.getElementById('view-login');
             viewLogin.classList.remove('hidden', 'fade-exit-active');
             viewLogin.classList.add('flex', 'fade-enter-active');
             
-            // Reset Progress Bar agar jika ada user lain masuk animasinya termuat ulang
             const pb = document.querySelector('.progress-animate');
             if(pb) { pb.style.animation = 'none'; }
             
             alertCustom("Anda telah keluar dari sistem.");
-        }, 400); // Menunggu durasi animasi modal tertutup
+        }, 400); 
     }
-
 </script>
 </body>
 </html>
