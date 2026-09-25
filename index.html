@@ -1855,11 +1855,13 @@
         btnUnduh.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Proses...';
         btnUnduh.disabled = true;
 
-        const tglCetak = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+        const tglCetak = new Date().toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'});
+        let pendaftaran = parseInt(userData.pendaftaran) || 0;
         let daftarUlang = parseInt(userData.daftar_ulang) || ((userData.jk === 'P' || userData.jk === 'p') ? 3850000 : 3780000);
         let bopd = parseInt(userData.bopd) || 0;
         let earlyBird = parseInt(userData.early_bird) || 0;
         let kaderAum = parseInt(userData.kader_aum) || 0;
+        
         let totalDiskon = earlyBird + kaderAum;
         let totalTagihan = (daftarUlang + bopd) - totalDiskon;
 
@@ -1867,47 +1869,125 @@
         strukDiv.style.position = 'absolute';
         strukDiv.style.left = '-9999px';
         strukDiv.style.top = '0';
-        strukDiv.style.width = '300px'; 
+        strukDiv.style.width = '72mm'; // Spesifikasi 1: Lebar area cetak 72mm untuk printer 80mm
+        strukDiv.style.margin = '0';
         strukDiv.style.backgroundColor = '#ffffff';
         strukDiv.style.color = '#000000';
-        strukDiv.style.fontFamily = "'Courier New', Courier, monospace";
-        strukDiv.style.padding = '20px';
-        strukDiv.style.boxSizing = 'border-box';
-
+        
+        // Memasukkan style thermal-print langsung ke struk agar ditangkap canvas dengan presisi
         strukDiv.innerHTML = `
-            <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 15px;">
-                <img src="https://iili.io/nuUTLcN.md.png" style="width: 50px; height: 50px; margin-bottom: 8px; filter: grayscale(100%); display: block; margin-left: auto; margin-right: auto;">
-                <h3 style="margin: 0; font-size: 15px; font-weight: bold;">SD MUH SUDAGARAN</h3>
-                <p style="margin: 3px 0 0 0; font-size: 11px;">Struk Pembayaran PMB Valid</p>
-            </div>
+            <style>
+                /* Spesifikasi 2: Font Monospace & Proporsi ideal struk 80mm */
+                .thermal-struk {
+                    font-family: 'Courier New', Courier, monospace;
+                    font-size: 12px;
+                    line-height: 1.2;
+                    width: 72mm;
+                    margin: 0 auto;
+                    padding: 10px 5px;
+                    box-sizing: border-box;
+                    background-color: white;
+                    color: black;
+                }
+                
+                /* Spesifikasi 3: Struktur (Header, Body, Footer) */
+                .struk-header { text-align: center; margin-bottom: 10px; }
+                .struk-title { font-size: 15px; font-weight: bold; margin-top: 5px; }
+                .struk-address { font-size: 10px; margin-top: 2px; }
+                
+                .struk-info { font-size: 11px; margin-bottom: 5px; }
+                .struk-flex { display: flex; justify-content: space-between; margin-bottom: 4px; }
+                .struk-flex-item { text-align: left; }
+                .struk-flex-price { text-align: right; }
+                
+                /* Spesifikasi 4: Class khusus untuk divider garis putus-putus */
+                .struk-divider {
+                    border-bottom: 1px dashed #000;
+                    margin: 8px 0;
+                }
+                
+                .struk-footer { text-align: center; font-size: 10px; margin-top: 15px; }
+            </style>
             
-            <div style="font-size: 11px; line-height: 1.6; margin-bottom: 15px;">
-                <div style="display: flex; justify-content: space-between;"><span>Tgl Cetak:</span> <span>${tglCetak}</span></div>
-                <div style="display: flex; justify-content: space-between;"><span>No. PPDB:</span> <span>${userData.no_ppdb || '-'}</span></div>
-                <div style="display: flex; justify-content: space-between;"><span>Nama:</span> <span style="text-align: right; font-weight: bold; max-width: 150px;">${userData.nama_murid || '-'}</span></div>
-                <div style="display: flex; justify-content: space-between;"><span>Kasir:</span> <span>${userData.kasir || 'Admin'}</span></div>
-            </div>
-            
-            <div style="font-size: 11px; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 10px 0; margin-bottom: 15px;">
-                <div style="text-align: center; margin-bottom: 8px; font-weight: bold;">RINCIAN TRANSAKSI</div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Pendaftaran</span> <span>LUNAS KASIR</span></div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Daftar Ulang</span> <span>${formatRupiah(daftarUlang)}</span></div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Biaya BOPD</span> <span>${formatRupiah(bopd)}</span></div>
-                ${earlyBird > 0 ? `<div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Pot. Early Bird</span> <span>-${formatRupiah(earlyBird)}</span></div>` : ''}
-                ${kaderAum > 0 ? `<div style="display: flex; justify-content: space-between; margin-bottom: 3px;"><span>Pot. Kader AUM</span> <span>-${formatRupiah(kaderAum)}</span></div>` : ''}
-            </div>
-            
-            <div style="font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 15px;">
-                <span>TOTAL:</span>
-                <span>${formatRupiah(totalTagihan)}</span>
-            </div>
-            
-            <div style="text-align: center; border: 2px solid #000; padding: 6px; font-weight: bold; font-size: 13px; margin-bottom: 20px;">
-                STATUS: LUNAS
-            </div>
-            
-            <div style="text-align: center; font-size: 10px; color: #444; line-height: 1.4;">
-                Terima kasih.<br>Simpan struk digital ini sebagai bukti pendaftaran ulang.
+            <div class="thermal-struk">
+                <!-- HEADER -->
+                <div class="struk-header">
+                    <img src="https://iili.io/nuUTLcN.md.png" style="width: 45px; height: 45px; filter: grayscale(100%); display: block; margin: 0 auto;">
+                    <div class="struk-title">SD MUH SUDAGARAN</div>
+                    <div class="struk-address">Jl. Sudagaran, Wonosobo<br>Bukti Pembayaran PMB Valid</div>
+                </div>
+                
+                <div class="struk-divider"></div>
+                
+                <!-- INFO TRANSAKSI -->
+                <div class="struk-info">
+                    <div class="struk-flex">
+                        <span class="struk-flex-item">Tgl Cetak:</span>
+                        <span class="struk-flex-price">${tglCetak}</span>
+                    </div>
+                    <div class="struk-flex">
+                        <span class="struk-flex-item">No. PPDB:</span>
+                        <span class="struk-flex-price">${userData.no_ppdb || '-'}</span>
+                    </div>
+                    <div class="struk-flex">
+                        <span class="struk-flex-item">Nama:</span>
+                        <span class="struk-flex-price" style="font-weight: bold; max-width: 140px; word-wrap: break-word; text-align: right;">${userData.nama_murid || '-'}</span>
+                    </div>
+                    <div class="struk-flex">
+                        <span class="struk-flex-item">Kasir:</span>
+                        <span class="struk-flex-price">${userData.kasir || 'Admin'}</span>
+                    </div>
+                </div>
+                
+                <div class="struk-divider"></div>
+                
+                <!-- BODY: RINCIAN ITEM -->
+                <div style="text-align: center; font-weight: bold; margin-bottom: 8px; font-size: 11px;">RINCIAN TRANSAKSI</div>
+                
+                <div class="struk-flex">
+                    <span class="struk-flex-item">Pendaftaran</span>
+                    <span class="struk-flex-price">${pendaftaran > 0 ? 'Rp 300.000' : 'LUNAS KASIR'}</span>
+                </div>
+                
+                <div class="struk-flex">
+                    <span class="struk-flex-item">Daftar Ulang</span>
+                    <span class="struk-flex-price">${formatRupiah(daftarUlang)}</span>
+                </div>
+                
+                <div class="struk-flex">
+                    <span class="struk-flex-item">Biaya BOPD</span>
+                    <span class="struk-flex-price">${bopd > 0 ? formatRupiah(bopd) : '='}</span>
+                </div>
+                
+                ${earlyBird > 0 ? `
+                <div class="struk-flex">
+                    <span class="struk-flex-item">Pot. Early Bird</span>
+                    <span class="struk-flex-price">-${formatRupiah(earlyBird)}</span>
+                </div>` : ''}
+                
+                ${kaderAum > 0 ? `
+                <div class="struk-flex">
+                    <span class="struk-flex-item">Pot. Kader AUM</span>
+                    <span class="struk-flex-price">-${formatRupiah(kaderAum)}</span>
+                </div>` : ''}
+                
+                <div class="struk-divider"></div>
+                
+                <!-- FOOTER -->
+                <div class="struk-flex" style="font-size: 14px; font-weight: bold; margin-top: 6px;">
+                    <span class="struk-flex-item">TOTAL</span>
+                    <span class="struk-flex-price">${formatRupiah(totalTagihan)}</span>
+                </div>
+                
+                <div style="text-align: center; border: 1px dashed #000; padding: 4px; font-weight: bold; font-size: 13px; margin: 12px 0;">
+                    STATUS: LUNAS
+                </div>
+                
+                <div class="struk-footer">
+                    Metode Pembayaran: Transfer Bank<br><br>
+                    Terima kasih.<br>
+                    Simpan struk digital ini<br>sebagai bukti yang sah.
+                </div>
             </div>
         `;
         
