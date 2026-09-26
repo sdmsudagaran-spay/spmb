@@ -1026,12 +1026,19 @@
         
         // Perhitungan Tanggal Jatuh Tempo
         const baseDate = user.created_at ? new Date(user.created_at) : new Date();
-        const formatBatas = (d) => `<span class="text-[10px] text-red-500 block mb-1 mt-0.5 font-medium"><i class="ph-bold ph-calendar-blank"></i> Batas Waktu: ${d.toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'})}</span>`;
-        
-        const dlDaftarUlang = new Date(baseDate); dlDaftarUlang.setDate(dlDaftarUlang.getDate() + 7); // 1 Minggu
-        const dlBopd1 = new Date(baseDate); dlBopd1.setMonth(dlBopd1.getMonth() + 2); // 2 Bulan
-        const dlBopd2 = new Date(baseDate); dlBopd2.setMonth(dlBopd2.getMonth() + 4); // 4 Bulan
-        const dlBopd3 = new Date(baseDate); dlBopd3.setMonth(dlBopd3.getMonth() + 6); // 6 Bulan
+const formatBatas = (d) => `<span class="text-[10px] text-red-500 block mb-1 mt-0.5 font-medium"><i class="ph-bold ph-calendar-blank"></i> Batas Waktu: ${d.toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'})}</span>`;
+
+const dlDaftarUlang = new Date(baseDate); 
+dlDaftarUlang.setDate(dlDaftarUlang.getDate() + 7); // 1 Minggu
+
+const dlBopd1 = new Date(baseDate); 
+dlBopd1.setMonth(dlBopd1.getMonth() + 2); // 2 Bulan
+
+const dlBopd2 = new Date(dlBopd1); 
+dlBopd2.setMonth(dlBopd2.getMonth() + 2); // 4 Bulan -> diganti jadi +2 dari tahap 1
+
+const dlBopd3 = new Date(dlBopd2); 
+dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tahap 2
 
         window.tagihanData = {
             daftarUlang: daftarUlang,
