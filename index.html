@@ -126,6 +126,12 @@
         .delay-200 { animation-delay: 0.2s; opacity: 0; }
         .delay-400 { animation-delay: 0.4s; opacity: 0; }
     </style>
+<link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0F2747">
+    <link rel="apple-touch-icon" href="https://iili.io/nuUTLcN.md.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PMB SDM">
 </head>
 <body>
 
@@ -2456,5 +2462,12 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
         }, 400); 
     }
 </script>
+<script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.error('PWA Error:', err));
+            });
+        }
+    </script>
 </body>
 </html>
