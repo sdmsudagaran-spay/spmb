@@ -1960,11 +1960,36 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
     }
 
     function lanjutBayar() {
-        document.getElementById('btn-lanjut-bayar')?.classList.add('hidden');
+        const btnLanjut = document.getElementById('btn-lanjut-bayar');
+        if (btnLanjut) btnLanjut.classList.add('hidden');
+        
         const bankInfo = document.getElementById('fin-bank-info');
-        if(bankInfo) {
+        if (bankInfo) {
             bankInfo.classList.remove('hidden');
             setTimeout(() => bankInfo.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
+        }
+
+        // Mapping ID Checkbox ke ID Form Unggah
+        const mapping = {
+            'pendaftaran': 'form-up-pendaftaran',
+            'daftar-ulang': 'form-up-daftarulang',
+            'bopd1': 'form-up-bopd1',
+            'bopd2': 'form-up-bopd2',
+            'bopd3': 'form-up-bopd3'
+        };
+
+        // Buka form unggah secara dinamis HANYA untuk tagihan yang dicentang
+        for (const [chkId, formId] of Object.entries(mapping)) {
+            const checkbox = document.getElementById('chk-' + chkId);
+            const formElement = document.getElementById(formId);
+            
+            if (formElement) {
+                if (checkbox && checkbox.checked) {
+                    formElement.classList.remove('hidden');
+                } else {
+                    formElement.classList.add('hidden');
+                }
+            }
         }
     }
 
