@@ -533,7 +533,6 @@
                     
                     <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
                         <div class="space-y-1 mb-4" id="fin-tagihan-list">
-                            <!-- Diisi secara dinamis melalui JavaScript -->
                             <div class="text-center text-xs text-brand-muted py-2">Memuat rincian tagihan...</div>
                         </div>
 
@@ -557,92 +556,86 @@
                     </button>
 
                     <div id="fin-bank-info" class="hidden fade-enter-active">
-    <h3 class="font-heading font-semibold text-brand-navy text-sm px-2 mt-6 mb-3">Instruksi Pembayaran</h3>
-    <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-        <i class="ph-fill ph-bank absolute -right-4 -bottom-4 text-7xl text-blue-500 opacity-5"></i>
-        
-        <p class="text-xs text-brand-navy mb-4 font-medium leading-relaxed relative z-10">
-            Silakan lakukan transfer tepat sesuai <strong class="text-blue-700">Total Dibayar</strong> ke rekening resmi PMB di bawah ini:
-        </p>
-        
-        <div class="bg-blue-600 rounded-xl p-4 mb-4 flex items-center justify-between relative z-10 shadow-sm text-white">
-            <div>
-                <p class="text-[10px] text-blue-200 uppercase font-semibold">Nominal Transfer</p>
-                <p id="fin-nominal-transfer" class="font-heading font-bold text-lg mt-0.5">Rp 0</p>
-            </div>
-            <button onclick="copyText(window.rawTotalTagihan || '0', 'Nominal transfer berhasil disalin!')" class="btn-press bg-white/20 text-white p-2.5 rounded-xl hover:bg-white/30 transition-colors border border-white/20" title="Salin Nominal">
-                <i class="ph ph-copy text-xl"></i>
-            </button>
-        </div>
-        
-        <div class="bg-white rounded-xl p-4 border border-blue-100 mb-4 relative z-10 shadow-sm">
-            <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-xs tracking-wider">BRI</div>
-                <div>
-                    <span class="font-semibold text-sm text-brand-navy block">Bank Rakyat Indonesia</span>
-                    <span class="text-[10px] text-brand-muted">Cabang Wonosobo</span>
-                </div>
-            </div>
-            
-            <div class="flex items-center justify-between mb-3">
-                <div>
-                    <p class="text-[10px] text-brand-muted uppercase tracking-wider font-semibold">Nomor Rekening</p>
-                    <p class="font-mono font-bold text-brand-navy text-lg tracking-widest mt-0.5">699901021110530</p>
-                </div>
-                <button onclick="copyText('699901021110530', 'Nomor Rekening BRI berhasil disalin!')" class="btn-press bg-blue-50 text-blue-600 p-2.5 rounded-xl hover:bg-blue-100 transition-colors shadow-sm" title="Salin Rekening">
-                    <i class="ph ph-copy text-xl"></i>
-                </button>
-            </div>
-            
-            <div class="bg-gray-50 rounded-lg p-2.5 border border-gray-100">
-                <p class="text-[10px] text-brand-muted uppercase tracking-wider font-semibold">Atas Nama</p>
-                <p class="font-medium text-xs text-brand-navy mt-0.5">PMB SD Muhammadiyah Sudagaran Wonosobo</p>
-            </div>
-        </div>
+                        <h3 class="font-heading font-semibold text-brand-navy text-sm px-2 mt-6 mb-3">Instruksi Pembayaran</h3>
+                        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+                            <i class="ph-fill ph-bank absolute -right-4 -bottom-4 text-7xl text-blue-500 opacity-5"></i>
+                            
+                            <p class="text-xs text-brand-navy mb-4 font-medium leading-relaxed relative z-10">
+                                Silakan lakukan transfer tepat sesuai <strong class="text-blue-700">Total Dibayar</strong> ke rekening resmi PMB di bawah ini:
+                            </p>
+                            
+                            <div class="bg-blue-600 rounded-xl p-4 mb-4 flex items-center justify-between relative z-10 shadow-sm text-white">
+                                <div>
+                                    <p class="text-[10px] text-blue-200 uppercase font-semibold">Nominal Transfer</p>
+                                    <p id="fin-nominal-transfer" class="font-heading font-bold text-lg mt-0.5">Rp 0</p>
+                                </div>
+                                <button onclick="copyText(window.rawTotalTagihan || '0', 'Nominal transfer berhasil disalin!')" class="btn-press bg-white/20 text-white p-2.5 rounded-xl hover:bg-white/30 transition-colors border border-white/20" title="Salin Nominal">
+                                    <i class="ph ph-copy text-xl"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl p-4 border border-blue-100 mb-4 relative z-10 shadow-sm">
+                                <div class="flex items-center gap-3 mb-3 pb-3 border-b border-gray-100">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700 font-bold text-xs tracking-wider">BRI</div>
+                                    <div>
+                                        <span class="font-semibold text-sm text-brand-navy block">Bank Rakyat Indonesia</span>
+                                        <span class="text-[10px] text-brand-muted">Cabang Wonosobo</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p class="text-[10px] text-brand-muted uppercase tracking-wider font-semibold">Nomor Rekening</p>
+                                        <p class="font-mono font-bold text-brand-navy text-lg tracking-widest mt-0.5">699901021110530</p>
+                                    </div>
+                                    <button onclick="copyText('699901021110530', 'Nomor Rekening BRI berhasil disalin!')" class="btn-press bg-blue-50 text-blue-600 p-2.5 rounded-xl hover:bg-blue-100 transition-colors shadow-sm" title="Salin Rekening">
+                                        <i class="ph ph-copy text-xl"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="bg-gray-50 rounded-lg p-2.5 border border-gray-100">
+                                    <p class="text-[10px] text-brand-muted uppercase tracking-wider font-semibold">Atas Nama</p>
+                                    <p class="font-medium text-xs text-brand-navy mt-0.5">PMB SD Muhammadiyah Sudagaran Wonosobo</p>
+                                </div>
+                            </div>
 
-        <!-- BLOK FORM UNGGAH DINAMIS (Kini tertanam kuat di dalam Info Bank) -->
-        <div id="dynamic-upload-forms" class="relative z-10 space-y-3 mt-4">
-            <hr class="border-dashed border-blue-200 mb-3 mt-1">
-            
-            <!-- Pendaftaran -->
-            <div id="form-up-pendaftaran" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
-                <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF Pendaftaran</label>
-                <input type="file" id="input-bukti-pendaftaran" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
-                <button onclick="prosesUploadPembayaran('input-bukti-pendaftaran', currentUser.no_ppdb, 'bukti_tf_pendaftaran')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti Pendaftaran</button>
-            </div>
+                            <!-- BLOK FORM UNGGAH DINAMIS -->
+                            <div id="dynamic-upload-forms" class="relative z-10 space-y-3 mt-4">
+                                <hr class="border-dashed border-blue-200 mb-3 mt-1">
+                                
+                                <div id="form-up-pendaftaran" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
+                                    <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF Pendaftaran</label>
+                                    <input type="file" id="input-bukti-pendaftaran" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
+                                    <button onclick="prosesUploadPembayaran('input-bukti-pendaftaran', currentUser.no_ppdb, 'bukti_tf_pendaftaran')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti Pendaftaran</button>
+                                </div>
 
-            <!-- Daftar Ulang -->
-            <div id="form-up-daftarulang" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
-                <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF Daftar Ulang</label>
-                <input type="file" id="input-bukti-daftarulang" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
-                <button onclick="prosesUploadPembayaran('input-bukti-daftarulang', currentUser.no_ppdb, 'bukti_tf_daftar_ulang')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti Daftar Ulang</button>
-            </div>
+                                <div id="form-up-daftarulang" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
+                                    <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF Daftar Ulang</label>
+                                    <input type="file" id="input-bukti-daftarulang" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
+                                    <button onclick="prosesUploadPembayaran('input-bukti-daftarulang', currentUser.no_ppdb, 'bukti_tf_daftar_ulang')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti Daftar Ulang</button>
+                                </div>
 
-            <!-- BOPD 1 -->
-            <div id="form-up-bopd1" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
-                <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF BOPD (Tahap 1)</label>
-                <input type="file" id="input-bukti-bopd1" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
-                <button onclick="prosesUploadPembayaran('input-bukti-bopd1', currentUser.no_ppdb, 'bukti_tf_bopd1')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti BOPD 1</button>
-            </div>
+                                <div id="form-up-bopd1" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
+                                    <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF BOPD (Tahap 1)</label>
+                                    <input type="file" id="input-bukti-bopd1" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
+                                    <button onclick="prosesUploadPembayaran('input-bukti-bopd1', currentUser.no_ppdb, 'bukti_tf_bopd1')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti BOPD 1</button>
+                                </div>
 
-            <!-- BOPD 2 -->
-            <div id="form-up-bopd2" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
-                <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF BOPD (Tahap 2)</label>
-                <input type="file" id="input-bukti-bopd2" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
-                <button onclick="prosesUploadPembayaran('input-bukti-bopd2', currentUser.no_ppdb, 'bukti_tf_bopd2')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti BOPD 2</button>
-            </div>
+                                <div id="form-up-bopd2" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
+                                    <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF BOPD (Tahap 2)</label>
+                                    <input type="file" id="input-bukti-bopd2" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
+                                    <button onclick="prosesUploadPembayaran('input-bukti-bopd2', currentUser.no_ppdb, 'bukti_tf_bopd2')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti BOPD 2</button>
+                                </div>
 
-            <!-- BOPD 3 -->
-            <!-- BOPD 3 -->
-            <div id="form-up-bopd3" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
-                <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF BOPD (Tahap 3)</label>
-                <input type="file" id="input-bukti-bopd3" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
-                <button onclick="prosesUploadPembayaran('input-bukti-bopd3', currentUser.no_ppdb, 'bukti_tf_bopd3')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti BOPD 3</button>
-            </div>
-        </div> <!-- Penutup dynamic-upload-forms -->
-    </div> <!-- Penutup fin-bank-info -->
+                                <div id="form-up-bopd3" class="hidden p-3 border border-blue-100 rounded-xl bg-white shadow-sm">
+                                    <label class="block text-[10px] font-bold text-brand-navy uppercase mb-2">Bukti TF BOPD (Tahap 3)</label>
+                                    <input type="file" id="input-bukti-bopd3" accept="image/png, image/jpeg" class="block w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-2 cursor-pointer">
+                                    <button onclick="prosesUploadPembayaran('input-bukti-bopd3', currentUser.no_ppdb, 'bukti_tf_bopd3')" class="w-full bg-blue-600 text-white text-xs py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors btn-press"><i class="ph-bold ph-upload-simple mr-1"></i> Kirim Bukti BOPD 3</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <div id="fin-riwayat-section" class="hidden fade-enter-active">
                     <div id="fin-riwayat-section" class="hidden fade-enter-active">
                         <h3 class="font-heading font-semibold text-brand-navy text-sm px-2 mt-6 mb-3">Riwayat Transaksi</h3>
                         <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
