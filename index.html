@@ -867,7 +867,90 @@
             icon.classList.replace('ph-eye-slash', 'ph-eye');
         }
     }
+/**
+ * Fungsi Universal untuk Mengirim Bukti Pembayaran ke Storage & Update Database
+ */
+async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase) {
+    const fileInput = document.getElementById(inputElementId);
+    if (!fileInput || fileInput.files.length === 0) {
+        alert("Silakan pilih file gambar bukti transfer terlebih dahulu.");
+        return;
+    }
 
+    const fileObj = fileInput.files[0];
+    
+    // Validasi Ukuran (Maks 2MB)
+    if (fileObj.size > 2097152) {
+        alert("Ukuran file terlalu besar! Maksimal 2 MB.");
+        return;
+    }
+
+    // Ambil base URL bersih tanpa '/rest/v1/' agar tidak terjadi double path
+    const cleanBaseUrl = SUPABASE_URL.replace('/rest/v1/', '');
+
+    try {
+        // 1. Verifikasi Eksistensi Siswa di Tabel Keuangan menggunakan SUPABASE_URL bawaan Anda
+        const cekDB = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${noPpdb}`, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const dataDB = await cekDB.json();
+        
+        if (!dataDB || dataDB.length === 0) {
+            throw new Error("Data tagihan Anda belum diproses sistem. Silakan hubungi panitia.");
+        }
+
+        // 2. Format Nama File Unik (NoPPDB_Kolom_Timestamp.ext)
+        const fileExt = fileObj.name.split('.').pop().toLowerCase();
+        const namaFileUnik = `${noPpdb}_${namaKolomDatabase}_${Date.now()}.${fileExt}`;
+        
+        // Arahkan URL tembak ke Storage API
+        const urlUploadStorage = `${cleanBaseUrl}/storage/v1/object/bukti_transfer/${namaFileUnik}`;
+
+        // 3. Eksekusi Unggah File Fisik ke Bucket Storage
+        const resUpload = await fetch(urlUploadStorage, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': fileObj.type
+            },
+            body: fileObj
+        });
+
+        if (!resUpload.ok) {
+            const err = await resUpload.json();
+            throw new Error(`Gagal menyimpan file ke server: ${err.message || 'Error tidak diketahui'}`);
+        }
+
+        // 4. Susun URL Publik Hasil Unggahan
+        const publicUrl = `${cleanBaseUrl}/storage/v1/object/public/bukti_transfer/${namaFileUnik}`;
+
+        // 5. Update Database Keuangan dengan URL Publik tersebut
+        const payloadPatch = {};
+        payloadPatch[namaKolomDatabase] = publicUrl;
+
+        const resPatch = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${noPpdb}`, {
+            method: 'PATCH',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payloadPatch)
+        });
+
+        if (!resPatch.ok) throw new Error("File berhasil diunggah, tetapi gagal ditautkan ke database tagihan.");
+
+        alert(`Bukti pembayaran berhasil dikirim dan menunggu verifikasi Admin.`);
+        
+        // Refresh UI (Gunakan fungsi pembaruan UI bawaan Anda di sini jika ada)
+        // updateDashboardUI(currentUser); 
+        
+    } catch (error) {
+        console.error(error);
+        alert(`Sistem Terhenti: ${error.message}`);
+    }
+}
     function formatRupiah(angka) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
     }
