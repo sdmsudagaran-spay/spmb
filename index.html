@@ -641,49 +641,6 @@
         </div>
     </div>
 </div>
-
-<!-- Auto-Toggle Form: Menimpa fungsi bawaan agar sinkron dengan centang tanpa mengubah baris JS di bawah -->
-<script>
-    function lanjutBayar() {
-    document.getElementById('btn-lanjut-bayar')?.classList.add('hidden');
-    const bankInfo = document.getElementById('fin-bank-info');
-    if(bankInfo) {
-        bankInfo.classList.remove('hidden');
-        setTimeout(() => bankInfo.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
-    }
-    
-    // Buka form unggah secara dinamis berdasarkan centang tagihan
-    const mapping = {
-        'pendaftaran': 'form-up-pendaftaran',
-        'daftar-ulang': 'form-up-daftarulang',
-        'bopd1': 'form-up-bopd1',
-        'bopd2': 'form-up-bopd2',
-        'bopd3': 'form-up-bopd3'
-    };
-    
-    for (const [chkId, formId] of Object.entries(mapping)) {
-        const chk = document.getElementById('chk-' + chkId);
-        const form = document.getElementById(formId);
-        if(form) form.classList.toggle('hidden', !(chk && chk.checked));
-    }
-}
-        
-        const mapping = {
-            'pendaftaran': 'form-up-pendaftaran',
-            'daftar-ulang': 'form-up-daftarulang',
-            'bopd1': 'form-up-bopd1',
-            'bopd2': 'form-up-bopd2',
-            'bopd3': 'form-up-bopd3'
-        };
-        
-        for (const [chkId, formId] of Object.entries(mapping)) {
-            const chk = document.getElementById('chk-' + chkId);
-            const form = document.getElementById(formId);
-            if(form) form.classList.toggle('hidden', !(chk && chk.checked));
-        }
-    }
-</script>
-<!-- AKHIR BUKTI TRANSFER DINAMIS -->
                         </div>
                     </div>
 
@@ -1577,7 +1534,7 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                             // TARIK DATA GABUNGAN DARI TABEL LAIN
                             let keuData = {};
                             try {
-                                const keuRes = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                                const keuRes = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(keuRes.ok) { const keu = await keuRes.json(); if(keu.length > 0) keuData = keu[0]; }
                             } catch(e) {}
                             
@@ -2266,7 +2223,7 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                     const userData = data[0];
                     
                     let keuData = {};
-                    try { const res = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) keuData = d[0]; } } catch(e) {}
+                    try { const res = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) keuData = d[0]; } } catch(e) {}
                     
                     let analData = {};
                     try { const res = await fetch(`${SUPABASE_URL}analisis?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) analData = d[0]; } } catch(e) {}
