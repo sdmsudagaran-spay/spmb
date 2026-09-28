@@ -646,12 +646,28 @@
 <!-- Auto-Toggle Form: Menimpa fungsi bawaan agar sinkron dengan centang tanpa mengubah baris JS di bawah -->
 <script>
     function lanjutBayar() {
-        document.getElementById('btn-lanjut-bayar')?.classList.add('hidden');
-        const bankInfo = document.getElementById('fin-bank-info');
-        if(bankInfo) {
-            bankInfo.classList.remove('hidden');
-            setTimeout(() => bankInfo.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
-        }
+    document.getElementById('btn-lanjut-bayar')?.classList.add('hidden');
+    const bankInfo = document.getElementById('fin-bank-info');
+    if(bankInfo) {
+        bankInfo.classList.remove('hidden');
+        setTimeout(() => bankInfo.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
+    }
+    
+    // Buka form unggah secara dinamis berdasarkan centang tagihan
+    const mapping = {
+        'pendaftaran': 'form-up-pendaftaran',
+        'daftar-ulang': 'form-up-daftarulang',
+        'bopd1': 'form-up-bopd1',
+        'bopd2': 'form-up-bopd2',
+        'bopd3': 'form-up-bopd3'
+    };
+    
+    for (const [chkId, formId] of Object.entries(mapping)) {
+        const chk = document.getElementById('chk-' + chkId);
+        const form = document.getElementById(formId);
+        if(form) form.classList.toggle('hidden', !(chk && chk.checked));
+    }
+}
         
         const mapping = {
             'pendaftaran': 'form-up-pendaftaran',
