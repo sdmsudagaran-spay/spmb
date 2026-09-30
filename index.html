@@ -1152,10 +1152,37 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
         const kaderAum = parseInt(user.kader_aum) || 0;
         const beasiswaLainnya = parseInt(user.beasiswa_lainnya) || 0;
         
-        // Perhitungan Tanggal Jatuh Tempo
-        const baseDate = user.created_at ? new Date(user.created_at) : new Date();
-const formatBatas = (d) => `<span class="text-[10px] text-red-500 block mb-1 mt-0.5 font-medium"><i class="ph-bold ph-calendar-blank"></i> Batas Waktu: ${d.toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'})}</span>`;
+       // Perhitungan Tanggal Jatuh Tempo Terkunci
+        let baseDate;
+        if (user.tgl_pendaftaran) {
+            baseDate = new Date(user.tgl_pendaftaran);
+        } else if (user.created_at) {
+            baseDate = new Date(user.created_at);
+        } else {
+            // JANGAN pernah gunakan new Date() dinamis di sini. Kunci di satu tanggal jika data rusak.
+            baseDate = new Date("2026-01-01"); 
+        }
 
+        const formatBatas = (d) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalisasi ke jam 00:00 agar hitungan hari presisi
+            const target = new Date(d);
+            target.setHours(0, 0, 0, 0);
+            
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            let notifHtml = '';
+            if (diffDays === 1) {
+                notifHtml = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-yellow-300 font-bold">Besok Jatuh Tempo!</span>`;
+            } else if (diffDays === 0) {
+                notifHtml = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-orange-300 font-bold">Jatuh Tempo Hari Ini!</span>`;
+            } else if (diffDays < 0) {
+                notifHtml = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 border border-red-300 font-bold">Terlambat ${Math.abs(diffDays)} Hari</span>`;
+            }
+
+            return `<span class="text-[10px] text-red-500 block mb-1 mt-0.5 font-medium"><i class="ph-bold ph-calendar-blank"></i> Batas Waktu: ${d.toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'})} ${notifHtml}</span>`;
+        };
 const dlDaftarUlang = new Date(baseDate); 
 dlDaftarUlang.setDate(dlDaftarUlang.getDate() + 7); // 1 Minggu
 
