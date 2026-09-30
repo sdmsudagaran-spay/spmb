@@ -1566,7 +1566,7 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                             // TARIK DATA GABUNGAN DARI TABEL LAIN
                             let keuData = {};
                             try {
-                                const keuRes = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                                const keuRes = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,tgl_pendaftaran,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(keuRes.ok) { const keu = await keuRes.json(); if(keu.length > 0) keuData = keu[0]; }
                             } catch(e) {}
                             
@@ -2255,7 +2255,7 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                     const userData = data[0];
                     
                     let keuData = {};
-                    try { const res = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) keuData = d[0]; } } catch(e) {}
+                    try { const res = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,tgl_pendaftaran,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) keuData = d[0]; } } catch(e) {}
                     
                     let analData = {};
                     try { const res = await fetch(`${SUPABASE_URL}analisis?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) analData = d[0]; } } catch(e) {}
