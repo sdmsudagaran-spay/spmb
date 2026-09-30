@@ -1153,19 +1153,34 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
         const beasiswaLainnya = parseInt(user.beasiswa_lainnya) || 0;
         
        // Perhitungan Tanggal Jatuh Tempo Terkunci
+        // Perhitungan Tanggal Jatuh Tempo Terkunci & Berlapis
         let baseDate;
+        
+        // Prioritas 1: Ambil dari tgl_pendaftaran (Tabel Keuangan)
         if (user.tgl_pendaftaran) {
             baseDate = new Date(user.tgl_pendaftaran);
-        } else if (user.created_at) {
+        } 
+        // Prioritas 2: Jika tgl_pendaftaran kosong, ambil dari tanggal saat kasir memvalidasi pendaftaran
+        else if (user.tgl_bayar_pendaftaran) {
+            baseDate = new Date(user.tgl_bayar_pendaftaran);
+        } 
+        // Prioritas 3: Ambil dari tanggal akun dibuat (Tabel Pendaftar)
+        else if (user.created_at) {
             baseDate = new Date(user.created_at);
-        } else {
-            // JANGAN pernah gunakan new Date() dinamis di sini. Kunci di satu tanggal jika data rusak.
+        } 
+        // Fallback terakhir jika semuanya kosong
+        else {
             baseDate = new Date("2026-01-01"); 
+        }
+
+        // Pengaman ekstra: Jika data di Supabase ada tapi formatnya rusak/bukan tanggal
+        if (isNaN(baseDate.getTime())) {
+            baseDate = new Date("2026-01-01");
         }
 
         const formatBatas = (d) => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Normalisasi ke jam 00:00 agar hitungan hari presisi
+            today.setHours(0, 0, 0, 0); 
             const target = new Date(d);
             target.setHours(0, 0, 0, 0);
             
@@ -1566,7 +1581,7 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                             // TARIK DATA GABUNGAN DARI TABEL LAIN
                             let keuData = {};
                             try {
-                                const keuRes = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,tgl_pendaftaran,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                                const keuRes = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,tgl_pendaftaran,tgl_bayar_pendaftaran,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(keuRes.ok) { const keu = await keuRes.json(); if(keu.length > 0) keuData = keu[0]; }
                             } catch(e) {}
                             
@@ -2255,7 +2270,7 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                     const userData = data[0];
                     
                     let keuData = {};
-                    try { const res = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,tgl_pendaftaran,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) keuData = d[0]; } } catch(e) {}
+                    try { const res = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,tgl_pendaftaran,tgl_bayar_pendaftaran,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) keuData = d[0]; } } catch(e) {}
                     
                     let analData = {};
                     try { const res = await fetch(`${SUPABASE_URL}analisis?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) analData = d[0]; } } catch(e) {}
