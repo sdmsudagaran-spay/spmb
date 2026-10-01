@@ -1,6 +1,6 @@
 {
   "name": "Smart PMB SDM Sudagaran",
-  "short_name": "PMB SDM",
+  "short_name": "S-PMB SDM Murid",
   "description": "Aplikasi Penerimaan Murid Baru SD Muhammadiyah Sudagaran",
   "start_url": "./index.html",
   "display": "standalone",
