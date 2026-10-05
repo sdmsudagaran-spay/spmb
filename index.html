@@ -892,8 +892,61 @@
             icon.classList.replace('ph-eye-slash', 'ph-eye');
         }
     }
+
+/**
+ * FUNGSI KOMPRESI GAMBAR (CLIENT-SIDE)
+ * Memaksa gambar menjadi JPEG ringan, membuang format HEIC, dan meresize resolusi raksasa.
+ */
+function compressImage(file, maxWidth = 1200, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = event => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                // Cegah resolusi raksasa (Resize proporsional)
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                
+                // Beri background putih (mencegah gambar PNG transparan jadi hitam saat diubah ke JPG)
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Gambar ulang foto ke dalam canvas
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Konversi paksa ke Blob JPEG yang sangat ringan
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        });
+                        resolve(newFile);
+                    } else {
+                        reject(new Error("Gagal mengompresi gambar."));
+                    }
+                }, 'image/jpeg', quality);
+            };
+            img.onerror = () => reject(new Error("File tidak terbaca sebagai gambar yang valid."));
+        };
+        reader.onerror = () => reject(new Error("Gagal membaca file dari HP Anda."));
+    });
+}
 /**
  * Fungsi Universal untuk Mengirim Bukti Pembayaran ke Storage & Update Database
+ * (Sudah Dilengkapi Kompresi Gambar Otomatis)
  */
 async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase) {
     const fileInput = document.getElementById(inputElementId);
@@ -902,37 +955,38 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
         return;
     }
 
-    const fileObj = fileInput.files[0];
-    
-    if (fileObj.size > 2097152) {
-        alertCustom("Ukuran file terlalu besar! Maksimal 2 MB.");
-        return;
-    }
+    let fileObj = fileInput.files[0];
 
     // Ubah tombol jadi loading
     const parentDiv = fileInput.parentElement;
     const btnSubmit = parentDiv.querySelector('button');
     const originalBtnText = btnSubmit.innerHTML;
-    btnSubmit.innerHTML = '<i class="ph ph-spinner animate-spin text-lg mr-2"></i> Mengunggah...';
+    btnSubmit.innerHTML = '<i class="ph ph-spinner animate-spin text-lg mr-2"></i> Mengompresi & Mengunggah...';
     btnSubmit.disabled = true;
 
-    const cleanBaseUrl = SUPABASE_URL.replace('/rest/v1/', '');
-
     try {
-        // 1. Eksekusi Unggah File Fisik ke Bucket Storage 'bukti_transfer'
-        const fileExt = fileObj.name.split('.').pop().toLowerCase();
+        // 1. EKSEKUSI KOMPRESI: Ubah ke JPG standar, Max Width 1200px, Kualitas 80%
+        fileObj = await compressImage(fileObj, 1200, 0.8);
+        
+        if (fileObj.size > 2097152) {
+            throw new Error("Ukuran file masih terlalu besar meskipun sudah dikompresi. Maksimal 2 MB.");
+        }
+
+        const cleanBaseUrl = SUPABASE_URL.replace('/rest/v1/', '');
+        const fileExt = 'jpg'; // Format sudah dipastikan JPG oleh mesin kompresi
         const namaFileUnik = `${noPpdb}_${namaKolomDatabase}_${Date.now()}.${fileExt}`;
         const urlUploadStorage = `${cleanBaseUrl}/storage/v1/object/bukti_transfer/${namaFileUnik}`;
 
+        // 2. Eksekusi Unggah File Fisik yang sudah Ringan ke Bucket Storage
         const resUpload = await fetch(urlUploadStorage, {
             method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': fileObj.type },
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'image/jpeg' },
             body: fileObj
         });
 
-        if (!resUpload.ok) throw new Error(`Gagal menyimpan file ke Bucket Storage.`);
+        if (!resUpload.ok) throw new Error(`Gagal menyimpan file gambar ke server.`);
 
-        // 2. Susun Payload Data (URL Storage + Status Konfirmasi + Nominal Uang)
+        // 3. Susun Payload Data Database (URL Storage + Status Konfirmasi + Nominal Uang)
         const publicUrl = `${cleanBaseUrl}/storage/v1/object/public/bukti_transfer/${namaFileUnik}`;
         const konfKolom = namaKolomDatabase.replace('bukti_tf_', 'konf_');
         
@@ -940,13 +994,12 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
         payloadDB[namaKolomDatabase] = publicUrl;
         payloadDB[konfKolom] = false; // Reset ke false agar admin memverifikasi ulang
 
-        // Injeksi Nominal Rupiah ke Tabel Keuangan sesuai Jenis Transaksi
         if (namaKolomDatabase === 'bukti_tf_daftar_ulang') payloadDB.daftar_ulang = window.tagihanData.daftarUlang;
         if (namaKolomDatabase === 'bukti_tf_bopd1') payloadDB.bopd1 = window.tagihanData.bopd1;
         if (namaKolomDatabase === 'bukti_tf_bopd2') payloadDB.bopd2 = window.tagihanData.bopd2;
         if (namaKolomDatabase === 'bukti_tf_bopd3') payloadDB.bopd3 = window.tagihanData.bopd3;
 
-        // 3. Cek Eksistensi Siswa di Tabel Keuangan
+        // 4. Cek Eksistensi Siswa di Tabel Keuangan
         const cekDB = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${noPpdb}`, {
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
@@ -975,7 +1028,7 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
             payloadDB.beasiswa_lainnya = 0;
         }
 
-        // 4. Eksekusi Simpan Data ke Tabel Keuangan
+        // 5. Eksekusi Simpan Data ke Tabel Keuangan
         const resDB = await fetch(reqUrl, {
             method: reqMethod,
             headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
@@ -984,15 +1037,14 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
 
         if (!resDB.ok) throw new Error("Struk masuk ke Storage, tapi gagal mencatat ke Tabel Keuangan.");
 
-        // 5. Perbarui Sesi Pengguna & Segarkan Antarmuka
+        // 6. Perbarui Sesi Pengguna & Segarkan Antarmuka
         currentUser[namaKolomDatabase] = publicUrl;
         currentUser[konfKolom] = false;
-        Object.assign(currentUser, payloadDB); // Sinkronisasi nominal uang
+        Object.assign(currentUser, payloadDB);
         
         updateDashboardUI(currentUser);
-        alertCustom(`Struk berhasil diunggah! Menunggu verifikasi admin.`);
+        alertCustom(`Struk berhasil dikirim! Menunggu verifikasi admin.`);
         
-        // Sembunyikan instruksi bank setelah sukses
         document.getElementById('fin-bank-info')?.classList.add('hidden');
         
     } catch (error) {
@@ -1001,7 +1053,7 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
         // Kembalikan status tombol
         btnSubmit.innerHTML = originalBtnText;
         btnSubmit.disabled = false;
-        fileInput.value = ''; // Reset input file
+        fileInput.value = ''; 
     }
 }
     function formatRupiah(angka) {
