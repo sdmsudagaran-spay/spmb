@@ -236,8 +236,9 @@
                     <button onclick="refreshData()" class="relative btn-press w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20 hover:bg-white/20 transition-colors" title="Perbarui Data">
                         <i class="ph ph-arrows-clockwise text-white text-xl"></i>
                     </button>
-                    <button onclick="handleLogout()" class="relative btn-press w-10 h-10 rounded-full bg-red-500/20 hover:bg-red-500/40 flex items-center justify-center border border-red-500/30 transition-colors" title="Keluar Aplikasi">
-                        <i class="ph ph-sign-out text-white text-xl"></i>
+                    <button class="relative btn-press w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                        <i class="ph ph-bell text-white text-xl"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                     </button>
                 </div>
             </div>
@@ -956,12 +957,6 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
 
     let fileObj = fileInput.files[0];
 
-    // Pelonggaran: Terima file asli dari HP hingga 10MB
-    if (fileObj.size > 10 * 1024 * 1024) {
-        alertCustom("Ukuran foto asli terlalu besar! Maksimal 10 MB.");
-        return;
-    }
-
     // Ubah tombol jadi loading
     const parentDiv = fileInput.parentElement;
     const btnSubmit = parentDiv.querySelector('button');
@@ -970,13 +965,13 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
     btnSubmit.disabled = true;
 
     try {
-        // Kompresi ketat: Ubah ke JPG standar, Max Width 1200px, Kualitas 80%
+        // 1. EKSEKUSI KOMPRESI: Ubah ke JPG standar, Max Width 1200px, Kualitas 80%
         fileObj = await compressImage(fileObj, 1200, 0.8);
         
-        // Pengecekan paska-kompresi (Sangat jarang melampaui 2MB)
-        if (fileObj.size > 5 * 1024 * 1024) {
-            throw new Error("Gagal mengompresi. Gunakan foto yang lebih kecil.");
+        if (fileObj.size > 2097152) {
+            throw new Error("Ukuran file masih terlalu besar meskipun sudah dikompresi. Maksimal 2 MB.");
         }
+
         const cleanBaseUrl = SUPABASE_URL.replace('/rest/v1/', '');
         const fileExt = 'jpg'; // Format sudah dipastikan JPG oleh mesin kompresi
         const namaFileUnik = `${noPpdb}_${namaKolomDatabase}_${Date.now()}.${fileExt}`;
@@ -1209,7 +1204,7 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
             containerPerlengkapan.innerHTML = htmlList;
         }
 
-        // 4. Keuangan (Terintegrasi 1 Pintu dengan Tabel Angsuran)
+        // 4. Keuangan 
         const pendaftaran = parseInt(user.pendaftaran) || 0;
         const daftarUlang = parseInt(user.daftar_ulang) || 0;
         const bopd = parseInt(user.bopd) || 0;
@@ -1217,65 +1212,85 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
         const kaderAum = parseInt(user.kader_aum) || 0;
         const beasiswaLainnya = parseInt(user.beasiswa_lainnya) || 0;
         
-        // Perhitungan Tanggal Jatuh Tempo Terkunci
+       // Perhitungan Tanggal Jatuh Tempo Terkunci
+        // Perhitungan Tanggal Jatuh Tempo Terkunci & Berlapis
         let baseDate;
-        if (user.tgl_pendaftaran) baseDate = new Date(user.tgl_pendaftaran);
-        else if (user.tgl_bayar_pendaftaran) baseDate = new Date(user.tgl_bayar_pendaftaran);
-        else if (user.created_at) baseDate = new Date(user.created_at);
-        else baseDate = new Date("2026-01-01"); 
-        if (isNaN(baseDate.getTime())) baseDate = new Date("2026-01-01");
+        
+        // Prioritas 1: Ambil dari tgl_pendaftaran (Tabel Keuangan)
+        if (user.tgl_pendaftaran) {
+            baseDate = new Date(user.tgl_pendaftaran);
+        } 
+        // Prioritas 2: Jika tgl_pendaftaran kosong, ambil dari tanggal saat kasir memvalidasi pendaftaran
+        else if (user.tgl_bayar_pendaftaran) {
+            baseDate = new Date(user.tgl_bayar_pendaftaran);
+        } 
+        // Prioritas 3: Ambil dari tanggal akun dibuat (Tabel Pendaftar)
+        else if (user.created_at) {
+            baseDate = new Date(user.created_at);
+        } 
+        // Fallback terakhir jika semuanya kosong
+        else {
+            baseDate = new Date("2026-01-01"); 
+        }
+
+        // Pengaman ekstra: Jika data di Supabase ada tapi formatnya rusak/bukan tanggal
+        if (isNaN(baseDate.getTime())) {
+            baseDate = new Date("2026-01-01");
+        }
 
         const formatBatas = (d) => {
-            const today = new Date(); today.setHours(0,0,0,0); 
-            const target = new Date(d); target.setHours(0,0,0,0);
-            const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+            const target = new Date(d);
+            target.setHours(0, 0, 0, 0);
+            
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
             let notifHtml = '';
-            if (diffDays === 1) notifHtml = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-yellow-300 font-bold">Besok Jatuh Tempo!</span>`;
-            else if (diffDays === 0) notifHtml = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-orange-300 font-bold">Jatuh Tempo Hari Ini!</span>`;
-            else if (diffDays < 0) notifHtml = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 border border-red-300 font-bold">Terlambat ${Math.abs(diffDays)} Hari</span>`;
+            if (diffDays === 1) {
+                notifHtml = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-yellow-300 font-bold">Besok Jatuh Tempo!</span>`;
+            } else if (diffDays === 0) {
+                notifHtml = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-orange-300 font-bold">Jatuh Tempo Hari Ini!</span>`;
+            } else if (diffDays < 0) {
+                notifHtml = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 border border-red-300 font-bold">Terlambat ${Math.abs(diffDays)} Hari</span>`;
+            }
+
             return `<span class="text-[10px] text-red-500 block mb-1 mt-0.5 font-medium"><i class="ph-bold ph-calendar-blank"></i> Batas Waktu: ${d.toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'})} ${notifHtml}</span>`;
         };
+const dlDaftarUlang = new Date(baseDate); 
+dlDaftarUlang.setDate(dlDaftarUlang.getDate() + 7); // 1 Minggu
 
-        const dlDaftarUlang = new Date(baseDate); dlDaftarUlang.setDate(dlDaftarUlang.getDate() + 7);
-        const dlBopd1 = new Date(baseDate); dlBopd1.setMonth(dlBopd1.getMonth() + 2);
-        const dlBopd2 = new Date(dlBopd1); dlBopd2.setMonth(dlBopd2.getMonth() + 2);
-        const dlBopd3 = new Date(dlBopd2); dlBopd3.setMonth(dlBopd3.getMonth() + 2);
+const dlBopd1 = new Date(baseDate); 
+dlBopd1.setMonth(dlBopd1.getMonth() + 2); // 2 Bulan
 
-        // MENGHITUNG SISA TAGIHAN MURNI BERDASARKAN TABEL ANGSURAN
-        const sumAngs = (kat) => (user.angsuran_list || []).filter(x => x.kategori === kat).reduce((a,b) => a + parseInt(b.nominal), 0);
+const dlBopd2 = new Date(dlBopd1); 
+dlBopd2.setMonth(dlBopd2.getMonth() + 2); // 4 Bulan -> diganti jadi +2 dari tahap 1
 
-        const baseBopd1 = bopd * 0.5;
-        const baseBopd2 = bopd * 0.25;
-        const baseBopd3 = bopd * 0.25;
-        const totalDiskon = earlyBird + kaderAum + beasiswaLainnya;
-
-        let sisaDaftarUlang = Math.max(0, daftarUlang - sumAngs('daftar_ulang'));
-        let sisaBopd1 = Math.max(0, baseBopd1 - totalDiskon - sumAngs('bopd1'));
-        let sisaBopd2 = Math.max(0, baseBopd2 - sumAngs('bopd2'));
-        let sisaBopd3 = Math.max(0, baseBopd3 - sumAngs('bopd3'));
+const dlBopd3 = new Date(dlBopd2); 
+dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tahap 2
 
         window.tagihanData = {
-            daftarUlangBase: daftarUlang, bopd1Base: baseBopd1, bopd2Base: baseBopd2, bopd3Base: baseBopd3,
-            sisaDaftarUlang, sisaBopd1, sisaBopd2, sisaBopd3, totalDiskon
+            daftarUlang: daftarUlang,
+            bopdTotal: bopd,
+            bopd1: bopd * 0.5,   // 50%
+            bopd2: bopd * 0.25,  // 25%
+            bopd3: bopd * 0.25,  // 25%
+            earlyBird: earlyBird,
+            kaderAum: kaderAum,
+            beasiswaLainnya: beasiswaLainnya,
+            totalDiskon: earlyBird + kaderAum + beasiswaLainnya
         };
 
-        const isLunasDaftarUlang = (user.konf_daftar_ulang === true) || (sisaDaftarUlang === 0 && daftarUlang > 0);
-        const isLunasBopd1 = (user.konf_bopd1 === true) || (sisaBopd1 === 0 && bopd > 0);
-        const isLunasBopd2 = (user.konf_bopd2 === true) || (sisaBopd2 === 0 && bopd > 0);
-        const isLunasBopd3 = (user.konf_bopd3 === true) || (sisaBopd3 === 0 && bopd > 0);
-
-        // HITUNG TOTAL TAGIHAN AKTIF (Keseluruhan sisa)
+        // HITUNG TOTAL TAGIHAN AKTIF (Keseluruhan sisa tagihan yang belum lunas)
         let totalTagihanAktif = 0;
         if (!(user.konf_pendaftaran === true)) totalTagihanAktif += 300000;
-        if (!isLunasDaftarUlang) totalTagihanAktif += sisaDaftarUlang;
+        if (!(user.konf_daftar_ulang === true) && daftarUlang > 0) totalTagihanAktif += daftarUlang;
         if (bopd > 0) {
-            if (!isLunasBopd1) totalTagihanAktif += sisaBopd1;
-            if (!isLunasBopd2) totalTagihanAktif += sisaBopd2;
-            if (!isLunasBopd3) totalTagihanAktif += sisaBopd3;
+            if (!(user.konf_bopd1 === true)) totalTagihanAktif += Math.max(0, window.tagihanData.bopd1 - window.tagihanData.totalDiskon);
+            if (!(user.konf_bopd2 === true)) totalTagihanAktif += window.tagihanData.bopd2;
+            if (!(user.konf_bopd3 === true)) totalTagihanAktif += window.tagihanData.bopd3;
         }
-        
-        const elHeroTotal = document.getElementById('fin-hero-total');
-        if (elHeroTotal) elHeroTotal.innerText = formatRupiah(totalTagihanAktif);
         
         // Perbarui Nominal Total Paling Atas (Hero Total)
         const elHeroTotal = document.getElementById('fin-hero-total');
@@ -1648,14 +1663,8 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
                                 if(perRes.ok) { const per = await perRes.json(); if(per.length > 0) perData = per[0]; }
                             } catch(e) {}
                             
-                            let angsData = [];
-                            try {
-                                const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                                if(angsRes.ok) { angsData = await angsRes.json(); }
-                            } catch(e) {}
-                            
                             // Gabungkan semua data menjadi satu object currentUser
-                            currentUser = { ...userData, ...keuData, ...analData, ...perData, angsuran_list: angsData };
+                            currentUser = { ...userData, ...keuData, ...analData, ...perData };
                             
                             // KUNCI BIODATA
                             const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
@@ -2334,14 +2343,8 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
                     
                     let perData = {};
                     try { const res = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) perData = d[0]; } } catch(e) {}
-
-                    let angsData = [];
-                            try {
-                                const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                                if(angsRes.ok) { angsData = await angsRes.json(); }
-                            } catch(e) {}
                     
-                    currentUser = { ...userData, ...keuData, ...analData, ...perData, angsuran_list: angsData };
+                    currentUser = { ...userData, ...keuData, ...analData, ...perData };
                     
                     const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
                     bioKeys.forEach(k => { 
