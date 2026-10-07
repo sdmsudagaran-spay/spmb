@@ -1070,30 +1070,22 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
         const chkBopd3 = document.getElementById('chk-bopd3');
         
         let subtotal = 0;
-        
         if (chkPend && chkPend.checked) subtotal += 300000;
-        if (chkDaftar && chkDaftar.checked) subtotal += window.tagihanData.daftarUlang;
+        if (chkDaftar && chkDaftar.checked) subtotal += window.tagihanData.sisaDaftarUlang; 
         
         let bopdDibayar = 0;
-        if (chkBopd1 && chkBopd1.checked) bopdDibayar += window.tagihanData.bopd1;
-        if (chkBopd2 && chkBopd2.checked) bopdDibayar += window.tagihanData.bopd2;
-        if (chkBopd3 && chkBopd3.checked) bopdDibayar += window.tagihanData.bopd3;
+        if (chkBopd1 && chkBopd1.checked) bopdDibayar += window.tagihanData.sisaBopd1;
+        if (chkBopd2 && chkBopd2.checked) bopdDibayar += window.tagihanData.sisaBopd2;
+        if (chkBopd3 && chkBopd3.checked) bopdDibayar += window.tagihanData.sisaBopd3;
         
-        let appliedDiscount = 0;
         const discSection = document.getElementById('fin-discount-section');
-        
-        // Potongan Diskon HANYA berlaku untuk meringankan BOPD Angsuran 1
         if (window.tagihanData.totalDiskon > 0 && chkBopd1 && chkBopd1.checked) {
-            appliedDiscount = window.tagihanData.totalDiskon;
-            if (appliedDiscount > window.tagihanData.bopd1) {
-                appliedDiscount = window.tagihanData.bopd1; 
-            }
             if (discSection) discSection.classList.remove('hidden');
         } else {
             if (discSection) discSection.classList.add('hidden');
         }
         
-        let totalTagihan = subtotal + bopdDibayar - appliedDiscount;
+        let totalTagihan = subtotal + bopdDibayar;
         if (totalTagihan < 0) totalTagihan = 0;
         
         window.rawTotalTagihan = totalTagihan.toString(); 
@@ -1110,7 +1102,6 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
             } else {
                 btnLanjut.disabled = true;
                 btnLanjut.classList.add('opacity-50', 'cursor-not-allowed');
-                
                 const bankInfo = document.getElementById('fin-bank-info');
                 if (bankInfo && !bankInfo.classList.contains('hidden')) {
                     bankInfo.classList.add('hidden');
@@ -1269,155 +1260,102 @@ dlBopd2.setMonth(dlBopd2.getMonth() + 2); // 4 Bulan -> diganti jadi +2 dari tah
 const dlBopd3 = new Date(dlBopd2); 
 dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tahap 2
 
-        window.tagihanData = {
-            daftarUlang: daftarUlang,
-            bopdTotal: bopd,
-            bopd1: bopd * 0.5,   // 50%
-            bopd2: bopd * 0.25,  // 25%
-            bopd3: bopd * 0.25,  // 25%
-            earlyBird: earlyBird,
-            kaderAum: kaderAum,
-            beasiswaLainnya: beasiswaLainnya,
-            totalDiskon: earlyBird + kaderAum + beasiswaLainnya
+        // ====================================================================
+        // MENGHITUNG SISA TAGIHAN MURNI BERDASARKAN TABEL ANGSURAN (1 PINTU)
+        // ====================================================================
+        const sumAngs = (target) => {
+            return (user.angsuran_list || []).filter(x => {
+                const k = (x.kategori || '').toLowerCase();
+                if (target === 'daftar_ulang') return k.includes('daftar');
+                if (target === 'bopd1') return k.includes('bopd') && k.includes('1');
+                if (target === 'bopd2') return k.includes('bopd') && k.includes('2');
+                if (target === 'bopd3') return k.includes('bopd') && k.includes('3');
+                return false;
+            }).reduce((a, b) => a + parseInt(b.nominal || 0), 0);
         };
 
-        // HITUNG TOTAL TAGIHAN AKTIF (Keseluruhan sisa tagihan yang belum lunas)
+        const baseBopd1 = bopd * 0.5;
+        const baseBopd2 = bopd * 0.25;
+        const baseBopd3 = bopd * 0.25;
+        const totalDiskon = earlyBird + kaderAum + beasiswaLainnya;
+
+        let sisaDaftarUlang = Math.max(0, daftarUlang - sumAngs('daftar_ulang'));
+        let sisaBopd1 = Math.max(0, baseBopd1 - totalDiskon - sumAngs('bopd1'));
+        let sisaBopd2 = Math.max(0, baseBopd2 - sumAngs('bopd2'));
+        let sisaBopd3 = Math.max(0, baseBopd3 - sumAngs('bopd3'));
+
+        window.tagihanData = {
+            daftarUlang: daftarUlang, bopdTotal: bopd, bopd1: baseBopd1, bopd2: baseBopd2, bopd3: baseBopd3,
+            earlyBird: earlyBird, kaderAum: kaderAum, beasiswaLainnya: beasiswaLainnya, totalDiskon: totalDiskon,
+            sisaDaftarUlang: sisaDaftarUlang, sisaBopd1: sisaBopd1, sisaBopd2: sisaBopd2, sisaBopd3: sisaBopd3
+        };
+
+        const isLunasDaftarUlang = (user.konf_daftar_ulang === true) || (sisaDaftarUlang === 0 && daftarUlang > 0);
+        const isLunasBopd1 = (user.konf_bopd1 === true) || (sisaBopd1 === 0 && bopd > 0);
+        const isLunasBopd2 = (user.konf_bopd2 === true) || (sisaBopd2 === 0 && bopd > 0);
+        const isLunasBopd3 = (user.konf_bopd3 === true) || (sisaBopd3 === 0 && bopd > 0);
+
         let totalTagihanAktif = 0;
-        if (!(user.konf_pendaftaran === true)) totalTagihanAktif += 300000;
-        if (!(user.konf_daftar_ulang === true) && daftarUlang > 0) totalTagihanAktif += daftarUlang;
+        let statusPendLunas = (user.konf_pendaftaran === true) || (pendaftaran > 0 && !user.bukti_tf_pendaftaran);
+        if (!statusPendLunas) totalTagihanAktif += 300000;
+        if (!isLunasDaftarUlang) totalTagihanAktif += sisaDaftarUlang;
         if (bopd > 0) {
-            if (!(user.konf_bopd1 === true)) totalTagihanAktif += Math.max(0, window.tagihanData.bopd1 - window.tagihanData.totalDiskon);
-            if (!(user.konf_bopd2 === true)) totalTagihanAktif += window.tagihanData.bopd2;
-            if (!(user.konf_bopd3 === true)) totalTagihanAktif += window.tagihanData.bopd3;
+            if (!isLunasBopd1) totalTagihanAktif += sisaBopd1;
+            if (!isLunasBopd2) totalTagihanAktif += sisaBopd2;
+            if (!isLunasBopd3) totalTagihanAktif += sisaBopd3;
         }
         
-        // Perbarui Nominal Total Paling Atas (Hero Total)
         const elHeroTotal = document.getElementById('fin-hero-total');
         if (elHeroTotal) elHeroTotal.innerText = formatRupiah(totalTagihanAktif);
 
-        // Render Rincian Tagihan Dinamis
         const tagihanList = document.getElementById('fin-tagihan-list');
         if (tagihanList) {
             let htmlTagihan = '';
             
             // ---------------- PENDAFTARAN ----------------
-            if (user.konf_pendaftaran === true) { 
-                htmlTagihan += `
-                <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg">
-                    <span class="text-brand-muted font-medium ml-1">Pendaftaran</span>
-                    <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span>
-                </div>`;
-            } else if (pendaftaran > 0 && !user.bukti_tf_pendaftaran) {
-                htmlTagihan += `
-                <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg">
-                    <span class="text-brand-muted font-medium ml-1">Pendaftaran</span>
-                    <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas di Kasir</span>
-                </div>`;
+            if (statusPendLunas) { 
+                htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">Pendaftaran</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
             } else if (user.bukti_tf_pendaftaran) {
-                htmlTagihan += `
-                <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1">
-                    <span class="text-brand-muted font-medium ml-1">Pendaftaran</span>
-                    <span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span>
-                </div>`;
+                htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">Pendaftaran</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
             } else { 
-                htmlTagihan += `
-                <label class="flex justify-between items-center text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1">
-                    <div class="text-brand-navy font-medium flex items-center gap-2">
-                        <input type="checkbox" id="chk-pendaftaran" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> 
-                        Pendaftaran
-                    </div>
-                    <span class="font-medium text-brand-navy shrink-0">Rp 300.000</span>
-                </label>`;
+                htmlTagihan += `<label class="flex justify-between items-center text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium flex items-center gap-2"><input type="checkbox" id="chk-pendaftaran" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> Pendaftaran</div><span class="font-medium text-brand-navy shrink-0">Rp 300.000</span></label>`;
             }
 
             // ---------------- DAFTAR ULANG ----------------
             if (daftarUlang > 0) {
-                if (user.konf_daftar_ulang === true) {
-                    htmlTagihan += `
-                    <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg">
-                        <span class="text-brand-muted font-medium ml-1">Daftar Ulang</span>
-                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span>
-                    </div>`;
+                if (isLunasDaftarUlang) {
+                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">Daftar Ulang</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
                 } else if (user.bukti_tf_daftar_ulang) {
-                    htmlTagihan += `
-                    <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1">
-                        <span class="text-brand-muted font-medium ml-1">Daftar Ulang</span>
-                        <span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span>
-                    </div>`;
+                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">Daftar Ulang</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
                 } else {
-                    htmlTagihan += `
-                    <label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1">
-                        <div class="text-brand-navy font-medium w-full">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="chk-daftar-ulang" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> 
-                                Daftar Ulang
-                            </div>
-                            ${formatBatas(dlDaftarUlang)}
-                        </div>
-                        <span class="font-medium text-brand-navy shrink-0">${formatRupiah(daftarUlang)}</span>
-                    </label>`;
+                    htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-daftar-ulang" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> Daftar Ulang</div>${formatBatas(dlDaftarUlang)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaDaftarUlang)}</span></label>`;
                 }
             }
 
             // ---------------- BOPD (DIPISAH 3 ANGSURAN) ----------------
             if (bopd > 0) {
-                // ANGSURAN 1 (50%)
-                if (user.konf_bopd1 === true) {
-                    htmlTagihan += `
-                    <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg">
-                        <span class="text-brand-muted font-medium ml-1">BOPD Angsuran 1</span>
-                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span>
-                    </div>`;
+                if (isLunasBopd1) {
+                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 1</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
                 } else if (user.bukti_tf_bopd1) {
-                    htmlTagihan += `
-                    <div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1">
-                        <span class="text-brand-muted font-medium ml-1">BOPD Angsuran 1</span>
-                        <span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span>
-                    </div>`;
+                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 1</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
                 } else {
-                    htmlTagihan += `
-                    <label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1">
-                        <div class="text-brand-navy font-medium w-full">
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="chk-bopd1" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> 
-                                BOPD Angsuran 1 (50%)
-                            </div>
-                            ${formatBatas(dlBopd1)}
-                        </div>
-                        <span class="font-medium text-brand-navy shrink-0">${formatRupiah(window.tagihanData.bopd1)}</span>
-                    </label>`;
+                    htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd1" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> BOPD Angsuran 1 (50%)</div>${formatBatas(dlBopd1)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd1)}</span></label>`;
                 }
 
-                // ANGSURAN 2 (25%)
-                if (user.konf_bopd2 === true) {
+                if (isLunasBopd2) {
                     htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 2</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold border border-green-200">Lunas</span></div>`;
                 } else if (user.bukti_tf_bopd2) {
                     htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 2</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold border border-yellow-200">Verifikasi</span></div>`;
                 } else {
-                    htmlTagihan += `
-                    <label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg cursor-pointer mb-1">
-                        <div class="text-brand-navy font-medium w-full">
-                            <div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd2" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded"> BOPD Angsuran 2 (25%)</div>
-                            ${formatBatas(dlBopd2)}
-                        </div>
-                        <span class="font-medium text-brand-navy shrink-0">${formatRupiah(window.tagihanData.bopd2)}</span>
-                    </label>`;
+                    htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg cursor-pointer mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd2" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded"> BOPD Angsuran 2 (25%)</div>${formatBatas(dlBopd2)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd2)}</span></label>`;
                 }
 
-                // ANGSURAN 3 (25%)
-                if (user.konf_bopd3 === true) {
+                if (isLunasBopd3) {
                     htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 3</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold border border-green-200">Lunas</span></div>`;
                 } else if (user.bukti_tf_bopd3) {
                     htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 3</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold border border-yellow-200">Verifikasi</span></div>`;
                 } else {
-                    htmlTagihan += `
-                    <label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg cursor-pointer mb-1">
-                        <div class="text-brand-navy font-medium w-full">
-                            <div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd3" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded"> BOPD Angsuran 3 (25%)</div>
-                            ${formatBatas(dlBopd3)}
-                        </div>
-                        <span class="font-medium text-brand-navy shrink-0">${formatRupiah(window.tagihanData.bopd3)}</span>
-                    </label>`;
+                    htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg cursor-pointer mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd3" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded"> BOPD Angsuran 3 (25%)</div>${formatBatas(dlBopd3)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd3)}</span></label>`;
                 }
             }
 
@@ -1662,8 +1600,14 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                                 if(perRes.ok) { const per = await perRes.json(); if(per.length > 0) perData = per[0]; }
                             } catch(e) {}
                             
+                            let angsData = [];
+                            try {
+                                const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                                if(angsRes.ok) { angsData = await angsRes.json(); }
+                            } catch(e) {}
+                            
                             // Gabungkan semua data menjadi satu object currentUser
-                            currentUser = { ...userData, ...keuData, ...analData, ...perData };
+                            currentUser = { ...userData, ...keuData, ...analData, ...perData, angsuran_list: angsData };
                             
                             // KUNCI BIODATA
                             const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
@@ -2342,8 +2286,13 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                     
                     let perData = {};
                     try { const res = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) perData = d[0]; } } catch(e) {}
-                    
-                    currentUser = { ...userData, ...keuData, ...analData, ...perData };
+
+                    let angsData = [];
+                    try {
+                        const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                        if(angsRes.ok) { angsData = await angsRes.json(); }
+                    } catch(e) {}
+                    currentUser = { ...userData, ...keuData, ...analData, ...perData, angsuran_list: angsData };
                     
                     const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
                     bioKeys.forEach(k => { 
