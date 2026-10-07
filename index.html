@@ -957,6 +957,12 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
 
     let fileObj = fileInput.files[0];
 
+    // Pelonggaran: Terima file asli dari HP hingga 10MB
+    if (fileObj.size > 10 * 1024 * 1024) {
+        alertCustom("Ukuran foto asli terlalu besar! Maksimal 10 MB.");
+        return;
+    }
+
     // Ubah tombol jadi loading
     const parentDiv = fileInput.parentElement;
     const btnSubmit = parentDiv.querySelector('button');
@@ -965,13 +971,13 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
     btnSubmit.disabled = true;
 
     try {
-        // 1. EKSEKUSI KOMPRESI: Ubah ke JPG standar, Max Width 1200px, Kualitas 80%
+        // Kompresi ketat: Ubah ke JPG standar, Max Width 1200px, Kualitas 80%
         fileObj = await compressImage(fileObj, 1200, 0.8);
         
-        if (fileObj.size > 2097152) {
-            throw new Error("Ukuran file masih terlalu besar meskipun sudah dikompresi. Maksimal 2 MB.");
+        // Pengecekan paska-kompresi (Sangat jarang melampaui 2MB)
+        if (fileObj.size > 5 * 1024 * 1024) {
+            throw new Error("Gagal mengompresi. Gunakan foto yang lebih kecil.");
         }
-
         const cleanBaseUrl = SUPABASE_URL.replace('/rest/v1/', '');
         const fileExt = 'jpg'; // Format sudah dipastikan JPG oleh mesin kompresi
         const namaFileUnik = `${noPpdb}_${namaKolomDatabase}_${Date.now()}.${fileExt}`;
@@ -1663,8 +1669,14 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                                 if(perRes.ok) { const per = await perRes.json(); if(per.length > 0) perData = per[0]; }
                             } catch(e) {}
                             
+                            let angsData = [];
+                            try {
+                                const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                                if(angsRes.ok) { angsData = await angsRes.json(); }
+                            } catch(e) {}
+                            
                             // Gabungkan semua data menjadi satu object currentUser
-                            currentUser = { ...userData, ...keuData, ...analData, ...perData };
+                            currentUser = { ...userData, ...keuData, ...analData, ...perData, angsuran_list: angsData };
                             
                             // KUNCI BIODATA
                             const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
@@ -2343,8 +2355,14 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                     
                     let perData = {};
                     try { const res = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) perData = d[0]; } } catch(e) {}
+
+                    let angsData = [];
+                            try {
+                                const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                                if(angsRes.ok) { angsData = await angsRes.json(); }
+                            } catch(e) {}
                     
-                    currentUser = { ...userData, ...keuData, ...analData, ...perData };
+                    currentUser = { ...userData, ...keuData, ...analData, ...perData, angsuran_list: angsData };
                     
                     const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
                     bioKeys.forEach(k => { 
