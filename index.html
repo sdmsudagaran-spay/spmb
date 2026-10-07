@@ -1131,19 +1131,16 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
 
         // 2. Profil Siswa
         const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val || '-'; };
-        
         safeSet('prof-nama_murid', user.nama_murid);
         safeSet('prof-no_ppdb', user.no_ppdb);
         safeSet('prof-jk', user.jk === 'L' ? 'Laki-laki' : (user.jk === 'P' ? 'Perempuan' : '-'));
         safeSet('prof-ttl', (user.tempat_lahir || '-') + ', ' + (user.tgl_lahir || '-'));
         safeSet('prof-alamat', user.alamat);
         safeSet('prof-tk', user.tk);
-
         safeSet('prof-ayah', user.ayah);
         safeSet('prof-agama_ayah', user.agama_ayah);
         safeSet('prof-pend_ayah', user.pend_ayah);
         safeSet('prof-pekrj_ayah', user.pekrj_ayah);
-
         safeSet('prof-ibu', user.ibu);
         safeSet('prof-agama_ibu', user.agama_ibu);
         safeSet('prof-pend_ibu', user.pend_ibu);
@@ -1177,24 +1174,12 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
                 const statusBg = isTaken ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200';
                 const statusText = isTaken ? '<i class="ph-bold ph-check"></i> Sudah' : 'Belum';
 
-                htmlList += `
-                    <div class="${bgClass} p-3 rounded-[16px] shadow-sm border flex items-center justify-between transition-colors">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0 ${iconColor} border border-gray-50">
-                                <i class="ph-fill ${item.icon} text-xl"></i>
-                            </div>
-                            <h4 class="text-xs font-semibold text-brand-navy">${item.label}</h4>
-                        </div>
-                        <div class="text-[10px] font-bold px-2 py-1 rounded-md ${statusBg} flex items-center gap-1 shrink-0">
-                            ${statusText}
-                        </div>
-                    </div>
-                `;
+                htmlList += `<div class="${bgClass} p-3 rounded-[16px] shadow-sm border flex items-center justify-between transition-colors"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0 ${iconColor} border border-gray-50"><i class="ph-fill ${item.icon} text-xl"></i></div><h4 class="text-xs font-semibold text-brand-navy">${item.label}</h4></div><div class="text-[10px] font-bold px-2 py-1 rounded-md ${statusBg} flex items-center gap-1 shrink-0">${statusText}</div></div>`;
             });
             containerPerlengkapan.innerHTML = htmlList;
         }
 
-        // 4. Keuangan 
+        // 4. Keuangan (Sinkron Angsuran 1 Pintu)
         const pendaftaran = parseInt(user.pendaftaran) || 0;
         const daftarUlang = parseInt(user.daftar_ulang) || 0;
         const bopd = parseInt(user.bopd) || 0;
@@ -1202,67 +1187,29 @@ async function prosesUploadPembayaran(inputElementId, noPpdb, namaKolomDatabase)
         const kaderAum = parseInt(user.kader_aum) || 0;
         const beasiswaLainnya = parseInt(user.beasiswa_lainnya) || 0;
         
-       // Perhitungan Tanggal Jatuh Tempo Terkunci
-        // Perhitungan Tanggal Jatuh Tempo Terkunci & Berlapis
         let baseDate;
-        
-        // Prioritas 1: Ambil dari tgl_pendaftaran (Tabel Keuangan)
-        if (user.tgl_pendaftaran) {
-            baseDate = new Date(user.tgl_pendaftaran);
-        } 
-        // Prioritas 2: Jika tgl_pendaftaran kosong, ambil dari tanggal saat kasir memvalidasi pendaftaran
-        else if (user.tgl_bayar_pendaftaran) {
-            baseDate = new Date(user.tgl_bayar_pendaftaran);
-        } 
-        // Prioritas 3: Ambil dari tanggal akun dibuat (Tabel Pendaftar)
-        else if (user.created_at) {
-            baseDate = new Date(user.created_at);
-        } 
-        // Fallback terakhir jika semuanya kosong
-        else {
-            baseDate = new Date("2026-01-01"); 
-        }
-
-        // Pengaman ekstra: Jika data di Supabase ada tapi formatnya rusak/bukan tanggal
-        if (isNaN(baseDate.getTime())) {
-            baseDate = new Date("2026-01-01");
-        }
+        if (user.tgl_pendaftaran) baseDate = new Date(user.tgl_pendaftaran);
+        else if (user.tgl_bayar_pendaftaran) baseDate = new Date(user.tgl_bayar_pendaftaran);
+        else if (user.created_at) baseDate = new Date(user.created_at);
+        else baseDate = new Date("2026-01-01"); 
+        if (isNaN(baseDate.getTime())) baseDate = new Date("2026-01-01");
 
         const formatBatas = (d) => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); 
-            const target = new Date(d);
-            target.setHours(0, 0, 0, 0);
-            
-            const diffTime = target - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
+            const today = new Date(); today.setHours(0,0,0,0); 
+            const target = new Date(d); target.setHours(0,0,0,0);
+            const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
             let notifHtml = '';
-            if (diffDays === 1) {
-                notifHtml = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-yellow-300 font-bold">Besok Jatuh Tempo!</span>`;
-            } else if (diffDays === 0) {
-                notifHtml = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-orange-300 font-bold">Jatuh Tempo Hari Ini!</span>`;
-            } else if (diffDays < 0) {
-                notifHtml = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 border border-red-300 font-bold">Terlambat ${Math.abs(diffDays)} Hari</span>`;
-            }
-
+            if (diffDays === 1) notifHtml = `<span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-yellow-300 font-bold">Besok Jatuh Tempo!</span>`;
+            else if (diffDays === 0) notifHtml = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 animate-pulse border border-orange-300 font-bold">Jatuh Tempo Hari Ini!</span>`;
+            else if (diffDays < 0) notifHtml = `<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-[4px] text-[9px] ml-2 border border-red-300 font-bold">Terlambat ${Math.abs(diffDays)} Hari</span>`;
             return `<span class="text-[10px] text-red-500 block mb-1 mt-0.5 font-medium"><i class="ph-bold ph-calendar-blank"></i> Batas Waktu: ${d.toLocaleDateString('id-ID', {day: '2-digit', month: 'short', year: 'numeric'})} ${notifHtml}</span>`;
         };
-const dlDaftarUlang = new Date(baseDate); 
-dlDaftarUlang.setDate(dlDaftarUlang.getDate() + 7); // 1 Minggu
 
-const dlBopd1 = new Date(baseDate); 
-dlBopd1.setMonth(dlBopd1.getMonth() + 2); // 2 Bulan
+        const dlDaftarUlang = new Date(baseDate); dlDaftarUlang.setDate(dlDaftarUlang.getDate() + 7);
+        const dlBopd1 = new Date(baseDate); dlBopd1.setMonth(dlBopd1.getMonth() + 2);
+        const dlBopd2 = new Date(dlBopd1); dlBopd2.setMonth(dlBopd2.getMonth() + 2);
+        const dlBopd3 = new Date(dlBopd2); dlBopd3.setMonth(dlBopd3.getMonth() + 2);
 
-const dlBopd2 = new Date(dlBopd1); 
-dlBopd2.setMonth(dlBopd2.getMonth() + 2); // 4 Bulan -> diganti jadi +2 dari tahap 1
-
-const dlBopd3 = new Date(dlBopd2); 
-dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tahap 2
-
-        // ====================================================================
-        // MENGHITUNG SISA TAGIHAN MURNI BERDASARKAN TABEL ANGSURAN (1 PINTU)
-        // ====================================================================
         const sumAngs = (target) => {
             return (user.angsuran_list || []).filter(x => {
                 const k = (x.kategori || '').toLowerCase();
@@ -1285,9 +1232,8 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
         let sisaBopd3 = Math.max(0, baseBopd3 - sumAngs('bopd3'));
 
         window.tagihanData = {
-            daftarUlang: daftarUlang, bopdTotal: bopd, bopd1: baseBopd1, bopd2: baseBopd2, bopd3: baseBopd3,
-            earlyBird: earlyBird, kaderAum: kaderAum, beasiswaLainnya: beasiswaLainnya, totalDiskon: totalDiskon,
-            sisaDaftarUlang: sisaDaftarUlang, sisaBopd1: sisaBopd1, sisaBopd2: sisaBopd2, sisaBopd3: sisaBopd3
+            sisaDaftarUlang, sisaBopd1, sisaBopd2, sisaBopd3, totalDiskon,
+            daftarUlangBase: daftarUlang, bopd1Base: baseBopd1, bopd2Base: baseBopd2, bopd3Base: baseBopd3
         };
 
         const isLunasDaftarUlang = (user.konf_daftar_ulang === true) || (sisaDaftarUlang === 0 && daftarUlang > 0);
@@ -1312,55 +1258,121 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
         if (tagihanList) {
             let htmlTagihan = '';
             
-            // ---------------- PENDAFTARAN ----------------
-            if (statusPendLunas) { 
-                htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">Pendaftaran</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
-            } else if (user.bukti_tf_pendaftaran) {
-                htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">Pendaftaran</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
-            } else { 
-                htmlTagihan += `<label class="flex justify-between items-center text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium flex items-center gap-2"><input type="checkbox" id="chk-pendaftaran" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> Pendaftaran</div><span class="font-medium text-brand-navy shrink-0">Rp 300.000</span></label>`;
-            }
+            // Pendaftaran
+            if (statusPendLunas) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">Pendaftaran</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
+            else if (user.bukti_tf_pendaftaran) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">Pendaftaran</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
+            else htmlTagihan += `<label class="flex justify-between items-center text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium flex items-center gap-2"><input type="checkbox" id="chk-pendaftaran" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> Pendaftaran</div><span class="font-medium text-brand-navy shrink-0">Rp 300.000</span></label>`;
 
-            // ---------------- DAFTAR ULANG ----------------
+            // Daftar Ulang
             if (daftarUlang > 0) {
-                if (isLunasDaftarUlang) {
-                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">Daftar Ulang</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
-                } else if (user.bukti_tf_daftar_ulang) {
-                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">Daftar Ulang</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
-                } else {
-                    htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-daftar-ulang" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> Daftar Ulang</div>${formatBatas(dlDaftarUlang)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaDaftarUlang)}</span></label>`;
-                }
+                if (isLunasDaftarUlang) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">Daftar Ulang</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
+                else if (user.bukti_tf_daftar_ulang) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">Daftar Ulang</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
+                else htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-daftar-ulang" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> Daftar Ulang</div>${formatBatas(dlDaftarUlang)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaDaftarUlang)}</span></label>`;
             }
 
-            // ---------------- BOPD (DIPISAH 3 ANGSURAN) ----------------
+            // BOPD
             if (bopd > 0) {
-                if (isLunasBopd1) {
-                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 1</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
-                } else if (user.bukti_tf_bopd1) {
-                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 1</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold flex items-center gap-1 border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
-                } else {
-                    htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd1" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> BOPD Angsuran 1 (50%)</div>${formatBatas(dlBopd1)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd1)}</span></label>`;
-                }
+                if (isLunasBopd1) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 1</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
+                else if (user.bukti_tf_bopd1) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 1</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
+                else htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer select-none mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd1" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded focus:ring-brand-gold focus:ring-offset-0"> BOPD Angsuran 1 (50%)</div>${formatBatas(dlBopd1)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd1)}</span></label>`;
 
-                if (isLunasBopd2) {
-                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 2</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold border border-green-200">Lunas</span></div>`;
-                } else if (user.bukti_tf_bopd2) {
-                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 2</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold border border-yellow-200">Verifikasi</span></div>`;
-                } else {
-                    htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg cursor-pointer mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd2" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded"> BOPD Angsuran 2 (25%)</div>${formatBatas(dlBopd2)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd2)}</span></label>`;
-                }
+                if (isLunasBopd2) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 2</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
+                else if (user.bukti_tf_bopd2) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 2</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
+                else htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd2" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded"> BOPD Angsuran 2 (25%)</div>${formatBatas(dlBopd2)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd2)}</span></label>`;
 
-                if (isLunasBopd3) {
-                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 3</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold border border-green-200">Lunas</span></div>`;
-                } else if (user.bukti_tf_bopd3) {
-                    htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 3</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold border border-yellow-200">Verifikasi</span></div>`;
-                } else {
-                    htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg cursor-pointer mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd3" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded"> BOPD Angsuran 3 (25%)</div>${formatBatas(dlBopd3)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd3)}</span></label>`;
-                }
+                if (isLunasBopd3) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1 bg-gray-50 rounded-lg"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 3</span><span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-md font-bold border border-green-200"><i class="ph-bold ph-check"></i> Lunas</span></div>`;
+                else if (user.bukti_tf_bopd3) htmlTagihan += `<div class="flex justify-between items-center text-sm p-1.5 -mx-1.5 mb-1"><span class="text-brand-muted font-medium ml-1">BOPD Angsuran 3</span><span class="bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-md font-bold border border-yellow-200"><i class="ph-bold ph-clock"></i> Verifikasi</span></div>`;
+                else htmlTagihan += `<label class="flex justify-between items-start text-sm hover:bg-gray-50 p-1.5 -mx-1.5 rounded-lg transition-colors cursor-pointer mb-1"><div class="text-brand-navy font-medium w-full"><div class="flex items-center gap-2"><input type="checkbox" id="chk-bopd3" onchange="hitungUlangTagihan()" class="w-4 h-4 text-brand-gold bg-gray-100 border-gray-300 rounded"> BOPD Angsuran 3 (25%)</div>${formatBatas(dlBopd3)}</div><span class="font-medium text-brand-navy shrink-0">${formatRupiah(sisaBopd3)}</span></label>`;
             }
-
             tagihanList.innerHTML = htmlTagihan;
         }
+
+        const discContainer = document.getElementById('fin-discount-container');
+        if (discContainer) {
+            let discHtml = '';
+            if (earlyBird > 0) discHtml += `<div class="flex justify-between items-center text-sm mb-2"><span class="text-brand-gold font-medium">Diskon Early Bird</span><span class="font-bold text-brand-gold">-${formatRupiah(earlyBird)}</span></div>`;
+            if (kaderAum > 0) discHtml += `<div class="flex justify-between items-center text-sm mb-2"><span class="text-brand-gold font-medium">Kader AUM</span><span class="font-bold text-brand-gold">-${formatRupiah(kaderAum)}</span></div>`;
+            if (beasiswaLainnya > 0) discHtml += `<div class="flex justify-between items-center text-sm"><span class="text-brand-gold font-medium">Beasiswa Lainnya</span><span class="font-bold text-brand-gold">-${formatRupiah(beasiswaLainnya)}</span></div>`;
+            discContainer.innerHTML = discHtml;
+        }
+
+        hitungUlangTagihan();
+
+        let statusPendTf = (user.bukti_tf_pendaftaran && !statusPendLunas);
+        let statusDaftarTf = (user.bukti_tf_daftar_ulang && !isLunasDaftarUlang);
+        let statusBopd1Tf = (user.bukti_tf_bopd1 && !isLunasBopd1);
+        let statusBopd2Tf = (user.bukti_tf_bopd2 && !isLunasBopd2);
+        let statusBopd3Tf = (user.bukti_tf_bopd3 && !isLunasBopd3);
+        
+        let hasLunas = statusPendLunas || isLunasDaftarUlang || isLunasBopd1 || isLunasBopd2 || isLunasBopd3;
+        let hasPending = statusPendTf || statusDaftarTf || statusBopd1Tf || statusBopd2Tf || statusBopd3Tf;
+
+        const riwayatSection = document.getElementById('fin-riwayat-section');
+        const statusBadge = document.getElementById('fin-status-badge');
+        
+        if (riwayatSection) {
+            let riwayatHtml = `<div class="flex justify-between items-end px-2 mt-6 mb-3"><h3 class="font-heading font-semibold text-brand-navy text-sm">Riwayat Transaksi</h3></div><div class="space-y-3">`;
+            let hasAnyTransaction = false;
+
+            const renderRow = (typeId, title, nominal, isLunas, isPending, buktiUrl) => {
+                if (!isLunas && !isPending) return ''; 
+                hasAnyTransaction = true;
+                const iconBg = isLunas ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600';
+                const iconPh = isLunas ? 'ph-check-circle' : 'ph-clock';
+                const statusText = isLunas ? 'LUNAS' : 'MENUNGGU VERIFIKASI';
+                const statusColor = isLunas ? 'text-green-600' : 'text-yellow-600';
+                
+                let actionsHtml = '';
+                if (buktiUrl && buktiUrl.startsWith('http')) actionsHtml += `<button onclick="bukaZoomBuktiSiswa('${buktiUrl}')" class="mt-2 mr-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 text-[10px] px-2.5 py-1.5 rounded-lg font-medium btn-press inline-flex items-center gap-1 transition-colors shadow-sm"><i class="ph-bold ph-eye text-xs"></i> Bukti TF</button>`;
+                if (isLunas) actionsHtml += `<button onclick="unduhStruk(currentUser, '${typeId}')" class="mt-2 bg-brand-gold hover:bg-yellow-600 text-white text-[10px] px-2.5 py-1.5 rounded-lg font-medium btn-press inline-flex items-center gap-1 transition-colors shadow-sm"><i class="ph-bold ph-printer text-xs"></i> Unduh Struk</button>`;
+                
+                return `<div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg}"><i class="ph-fill ${iconPh} text-2xl"></i></div><div><p class="font-semibold text-brand-navy text-sm">${title}</p><p class="text-[10px] font-bold ${statusColor} mt-0.5">${statusText}</p><div class="flex flex-wrap">${actionsHtml}</div></div></div><div class="text-right self-start"><p class="font-bold text-brand-navy text-sm">${formatRupiah(nominal)}</p></div></div>`;
+            };
+
+            riwayatHtml += renderRow('pendaftaran', 'Pendaftaran', 300000, statusPendLunas, statusPendTf, user.bukti_tf_pendaftaran);
+            riwayatHtml += renderRow('daftar_ulang', 'Daftar Ulang', daftarUlang, isLunasDaftarUlang, statusDaftarTf, user.bukti_tf_daftar_ulang);
+            riwayatHtml += renderRow('bopd1', 'BOPD Angsuran 1', baseBopd1 - totalDiskon, isLunasBopd1, statusBopd1Tf, user.bukti_tf_bopd1);
+            riwayatHtml += renderRow('bopd2', 'BOPD Angsuran 2', baseBopd2, isLunasBopd2, statusBopd2Tf, user.bukti_tf_bopd2);
+            riwayatHtml += renderRow('bopd3', 'BOPD Angsuran 3', baseBopd3, isLunasBopd3, statusBopd3Tf, user.bukti_tf_bopd3);
+            riwayatHtml += `</div>`;
+
+            if (hasAnyTransaction) riwayatSection.innerHTML = riwayatHtml;
+            riwayatSection.classList.toggle('hidden', !hasAnyTransaction);
+            
+            if (statusBadge) {
+                if (hasPending) {
+                    statusBadge.className = 'bg-yellow-500/20 text-yellow-300 text-[10px] px-2 py-1 rounded-md border border-yellow-500/30';
+                    statusBadge.innerText = 'Menunggu Verifikasi';
+                } else if (hasLunas) {
+                    statusBadge.className = 'bg-green-500/20 text-green-300 text-[10px] px-2 py-1 rounded-md border border-green-500/30';
+                    statusBadge.innerText = 'Lunas Terverifikasi';
+                } else {
+                    statusBadge.className = 'bg-red-500/20 text-red-300 text-[10px] px-2 py-1 rounded-md border border-red-500/30';
+                    statusBadge.innerText = 'Belum Lunas';
+                }
+            }
+        }
+
+        // 5. Dokumen
+        const dokContainer = document.getElementById('dokumen-container');
+        if (dokContainer) {
+            let htmlDok = '';
+            let iconKk = user.verifikasi_kk ? 'ph-check-circle' : (user.unggah_kk ? 'ph-clock' : 'ph-file-dashed');
+            let colorKk = user.verifikasi_kk ? 'text-green-500' : (user.unggah_kk ? 'text-yellow-500' : 'text-red-500');
+            let bgKk = user.verifikasi_kk ? 'bg-green-50' : (user.unggah_kk ? 'bg-yellow-50' : 'bg-red-50');
+            let statusKk = user.verifikasi_kk ? 'Terverifikasi' : (user.unggah_kk ? 'Menunggu Verifikasi' : 'Belum Diunggah');
+            let textBtnKk = user.verifikasi_kk || user.unggah_kk ? 'Lihat' : 'Unggah';
+            htmlDok += `<div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between mb-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg ${bgKk} flex items-center justify-center ${colorKk} shrink-0"><i class="ph-fill ${iconKk} text-xl"></i></div><div><h4 class="text-sm font-semibold text-brand-navy">Kartu Keluarga (KK)</h4><p class="text-[10px] font-medium ${colorKk} mt-0.5">${statusKk}</p></div></div><button class="bg-brand-bg text-brand-navy text-xs font-semibold px-3 py-1.5 rounded-lg btn-press">${textBtnKk}</button></div>`;
+
+            let iconAkta = user.verifikasi_akta ? 'ph-check-circle' : (user.unggah_akta ? 'ph-clock' : 'ph-file-dashed');
+            let colorAkta = user.verifikasi_akta ? 'text-green-500' : (user.unggah_akta ? 'text-yellow-500' : 'text-red-500');
+            let bgAkta = user.verifikasi_akta ? 'bg-green-50' : (user.unggah_akta ? 'bg-yellow-50' : 'bg-red-50');
+            let statusAkta = user.verifikasi_akta ? 'Terverifikasi' : (user.unggah_akta ? 'Menunggu Verifikasi' : 'Belum Diunggah');
+            let textBtnAkta = user.verifikasi_akta || user.unggah_akta ? 'Lihat' : 'Unggah';
+            htmlDok += `<div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100 flex items-center justify-between"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg ${bgAkta} flex items-center justify-center ${colorAkta} shrink-0"><i class="ph-fill ${iconAkta} text-xl"></i></div><div><h4 class="text-sm font-semibold text-brand-navy">Akta Kelahiran</h4><p class="text-[10px] font-medium ${colorAkta} mt-0.5">${statusAkta}</p></div></div><button class="bg-brand-bg text-brand-navy text-xs font-semibold px-3 py-1.5 rounded-lg btn-press">${textBtnAkta}</button></div>`;
+            dokContainer.innerHTML = htmlDok;
+        }
+    }
 
         // Render Diskon Dinamis 
         const discContainer = document.getElementById('fin-discount-container');
@@ -1581,35 +1593,37 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                         if (kataPertama === userInput && userData.password === passInput) {
                             isValid = true;
                             
-                            // TARIK DATA GABUNGAN DARI TABEL LAIN
+                            // Tarik Keuangan
                             let keuData = {};
                             try {
                                 const keuRes = await fetch(`${SUPABASE_URL}keuangan?no_ppdb=eq.${userData.no_ppdb}&select=no_ppdb,tgl_pendaftaran,tgl_bayar_pendaftaran,konf_pendaftaran,konf_daftar_ulang,konf_bopd1,konf_bopd2,konf_bopd3,daftar_ulang,bopd,bopd1,bopd2,bopd3,early_bird,kader_aum,beasiswa_lainnya,bukti_tf_pendaftaran,bukti_tf_daftar_ulang,bukti_tf_bopd1,bukti_tf_bopd2,bukti_tf_bopd3`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(keuRes.ok) { const keu = await keuRes.json(); if(keu.length > 0) keuData = keu[0]; }
                             } catch(e) {}
                             
+                            // Tarik Analisis
                             let analData = {};
                             try {
                                 const analRes = await fetch(`${SUPABASE_URL}analisis?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(analRes.ok) { const anal = await analRes.json(); if(anal.length > 0) analData = anal[0]; }
                             } catch(e) {}
                             
+                            // Tarik Perlengkapan
                             let perData = {};
                             try {
                                 const perRes = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(perRes.ok) { const per = await perRes.json(); if(per.length > 0) perData = per[0]; }
                             } catch(e) {}
                             
+                            // Tarik Angsuran (Pintu Sinkronisasi 1)
                             let angsData = [];
                             try {
                                 const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                                 if(angsRes.ok) { angsData = await angsRes.json(); }
                             } catch(e) {}
                             
-                            // Gabungkan semua data menjadi satu object currentUser
+                            // Gabung Semua
                             currentUser = { ...userData, ...keuData, ...analData, ...perData, angsuran_list: angsData };
                             
-                            // KUNCI BIODATA
                             const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
                             bioKeys.forEach(k => { 
                                 if(userData[k] !== undefined && userData[k] !== null) {
@@ -2286,12 +2300,10 @@ dlBopd3.setMonth(dlBopd3.getMonth() + 2); // 6 Bulan -> diganti jadi +2 dari tah
                     
                     let perData = {};
                     try { const res = await fetch(`${SUPABASE_URL}perlengkapan?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(res.ok) { const d = await res.json(); if(d.length > 0) perData = d[0]; } } catch(e) {}
-
+                    
                     let angsData = [];
-                    try {
-                        const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                        if(angsRes.ok) { angsData = await angsRes.json(); }
-                    } catch(e) {}
+                    try { const angsRes = await fetch(`${SUPABASE_URL}angsuran?no_ppdb=eq.${userData.no_ppdb}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }); if(angsRes.ok) { angsData = await angsRes.json(); } } catch(e) {}
+
                     currentUser = { ...userData, ...keuData, ...analData, ...perData, angsuran_list: angsData };
                     
                     const bioKeys = ['nama_murid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'tk', 'ayah', 'agama_ayah', 'pend_ayah', 'pekrj_ayah', 'ibu', 'agama_ibu', 'pend_ibu', 'pekrj_ibu'];
